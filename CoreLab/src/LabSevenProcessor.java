@@ -200,7 +200,7 @@ public class LabSevenProcessor extends ImageProcessor{
 		return result;
 	}
 	
-	private void convolveOnce(double[][] kernel, PixelManipulator outputPxm) {
+	private void convolveOnce(double[][] kernel, Pixel outputPxm) {
 		int xNot = workingPxm_.getX();
 		int yNot = workingPxm_.getY();
 		int halfXLength = kernel.length/2;
@@ -246,7 +246,7 @@ public class LabSevenProcessor extends ImageProcessor{
 	private void convolveImage(double[][] kernel) {
 		workingPxm_.reset();
 		BufferedImage result = blankCopy();
-		PixelManipulator outputPxm = new PixelManipulator(result);
+		Pixel outputPxm = new Pixel(result);
 		
 		while (workingPxm_.hasNext()) {
 			convolveOnce(kernel, outputPxm);
@@ -255,7 +255,7 @@ public class LabSevenProcessor extends ImageProcessor{
 		workingImage_ = result;
 	}
 	
-	private void medianFilterOnce(Boolean[][] filter, PixelManipulator outputPxm) {
+	private void medianFilterOnce(Boolean[][] filter, Pixel outputPxm) {
 		int xNot = workingPxm_.getX();
 		int yNot = workingPxm_.getY();
 		int halfXLength = filter.length/2;
@@ -288,7 +288,7 @@ public class LabSevenProcessor extends ImageProcessor{
 	private void filterImage(Boolean[][] filter) {
 		workingPxm_.reset();
 		BufferedImage result = blankCopy();
-		PixelManipulator outputPxm = new PixelManipulator(result);
+		Pixel outputPxm = new Pixel(result);
 		
 		while (workingPxm_.hasNext()) {
 			medianFilterOnce(filter, outputPxm);
