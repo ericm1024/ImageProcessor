@@ -1,6 +1,6 @@
 package labs;
-import HistogramProcessor;
 import ImageProcessor;
+import iproc.HistogramProcessor;
 
 import java.io.File;
 

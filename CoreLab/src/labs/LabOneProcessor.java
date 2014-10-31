@@ -1,7 +1,7 @@
 package labs;
 import AbstractPixel;
 import ImageProcessor;
-import RawPixel;
+import iproc.RawPixel;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

@@ -1,8 +1,8 @@
 package labs;
 import HSI;
 import ImageProcessor;
-import Pixel;
 import RGB;
+import iproc.Pixel;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
