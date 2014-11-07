@@ -1,10 +1,10 @@
 package iproc;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Iterator;
-import static iproc.RawPixel.*;
-import static iproc.RawPixel.ColorField.*;
+import iproc.RawPixel.ColorField;
 
 
 public class HistogramProcessor extends ImageProcessor {
@@ -61,9 +61,11 @@ public class HistogramProcessor extends ImageProcessor {
 	 * Returns a normalized 256x256 rgb histogram of the processor's working
 	 * image.
 	 */
-	public BufferedImage histogramRGB() {
+	public BufferedImage histogramRgb() {
+		
 		HashMap<ColorField, int[]> colorCounts = getShadeCounts();
 		normalizeCounts(colorCounts);
+		
 		return makeHistogram(colorCounts);
 	}
 	
@@ -73,19 +75,19 @@ public class HistogramProcessor extends ImageProcessor {
 	 */
 	public BufferedImage histogramGrey() {
 		makeGreyscale();
-		HashMap<ColorField, int[]> colorCounts = getShadeCounts();
-		normalizeCounts(colorCounts);
-		return makeHistogram(colorCounts);
+		return histogramRgb();
 	}
 		
 	/**
 	 * Returns a normalized 256x256 cumulative histogram of the processor's
 	 * working image.
 	 */
-	public BufferedImage cumulativeHistogramRGB() {
+	public BufferedImage cumulativeHistogramRgb() {
+		
 		HashMap<ColorField, int[]> colorCounts = getShadeCounts();
-		normalizeCounts(colorCounts);
 		makeCumulative(colorCounts);
+		normalizeCounts(colorCounts);
+		
 		return makeHistogram(colorCounts);
 	}
 
@@ -93,12 +95,9 @@ public class HistogramProcessor extends ImageProcessor {
 	 * Returns a normalized 256x256 cumulative greyscale histogram of the
 	 * processor's working image.
 	 */
-	public BufferedImage cumulativeHistogramGrey() {
+	public BufferedImage cumulativeHistogramGrey() {	
 		makeGreyscale();
-		HashMap<ColorField, int[]> colorCounts = getShadeCounts();
-		normalizeCounts(colorCounts);
-		makeCumulative(colorCounts);
-		return makeHistogram(colorCounts);
+		return cumulativeHistogramRgb();
 	}
 	
 	
@@ -114,7 +113,7 @@ public class HistogramProcessor extends ImageProcessor {
 		Iterator<Pixel> pixelItter = iterator();
 		
 		while (pixelItter.hasNext()) {
-			localRawPixel = pixelItter.next().getRawPixel();
+			localRawPixel = pixelItter.next().get();
 			Iterator<ColorField> colorItter = RawPixel.iterator(includeAlpha_);
 			
 			while (colorItter.hasNext()) {
@@ -174,15 +173,19 @@ public class HistogramProcessor extends ImageProcessor {
 		Iterator<Pixel> itter = proc.iterator();
 		while (itter.hasNext()) {
 			localPixel = itter.next();
-			localRawPixel = localPixel.getRawPixel();
+			localRawPixel = localPixel.get();
 			
 			Iterator<ColorField> colorItter = RawPixel.iterator(includeAlpha_);
 			while (colorItter.hasNext()) {
 				ColorField color = colorItter.next();
-				if (shadeCounts.get(color)[localPixel.getX()] <= 
-						localPixel.getY()) {
+				
+				// we want to color the histogram up to the value of the
+				// shade in the map, so  if the histogram color value is >=
+				// to our current y value, we set the color
+				if (shadeCounts.get(color)[localPixel.getX()] >=  
+						histogram.getHeight() - localPixel.getY()) {
 					localRawPixel.setColor(color, RawPixel.INT_COLOR_MAX);
-					localPixel.setRawPixel(localRawPixel);
+					localPixel.set(localRawPixel);
 				}
 			}
 			
@@ -237,7 +240,7 @@ public class HistogramProcessor extends ImageProcessor {
 		
 		while (pixelItter.hasNext()) {
 			localPixel = pixelItter.next();
-			localRawPixel = localPixel.getRawPixel();
+			localRawPixel = localPixel.get();
 			
 			// we don't want to include the alpha value when we transform
 			// to greyscale
@@ -249,8 +252,9 @@ public class HistogramProcessor extends ImageProcessor {
 			}
 			// we're averaging three color fields
 			sum /= 3; 
-			localRawPixel.setColorAll(sum, sum, sum, localRawPixel.getColorInt(ALPHA));
-			localPixel.setRawPixel(localRawPixel);
+			localRawPixel.setColorAll(sum, sum, sum, 
+					localRawPixel.getColorInt(ColorField.ALPHA));
+			localPixel.set(localRawPixel);
 		}
 	}
 }

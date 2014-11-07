@@ -1,10 +1,15 @@
 package iproc;
 
+import iproc.RawPixel.ColorField;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.HashMap;
 
 public class ConvolutionProcessor extends ImageProcessor {
-	
 	
 	/* constructors */
 	
@@ -33,196 +38,175 @@ public class ConvolutionProcessor extends ImageProcessor {
 		super(image);
 	}
 	
-	
 	/* public methods */
 	
-	public void convolveImage(double[][] kernel) {
+	public void convolve(double[][] kernel) {
 		BufferedImage result = blankCopy();
-		Pixel outputPixel = new Pixel(result);
-		Pixel workingPixel = new Pixel(result);
+
+		Iterator<Pixel> itter = iterator();
+		Pixel localPixel;
 		
-		while (workingPxm_.hasNext()) {
-			convolveOnce(kernel, outputPxm);
-			workingPxm_.next();
+		while (itter.hasNext()) {
+			localPixel = itter.next();
+			convolveOnce(kernel, new Pixel(
+					result, localPixel.getX(), localPixel.getY()));
 		}
 		workingImage_ = result;
 	}
 	
-	/* low pass filtering kernels  */
-	
-	public static double[][] getSquareKernel(int width) {
-		assert (width%2 == 1); // odd
-		double[][] kernel = new double[width][width];
+	public void filterImage(Boolean[][] filter) {
+		BufferedImage result = blankCopy();
 
-		for (int i = 0; i < kernel.length; i++) {
-			for (int j = 0; j < kernel[0].length; j++) {
-				kernel[i][j] = 1.0;
-			}
+		Iterator<Pixel> itter = iterator();
+		Pixel localPixel;
+		
+		while (itter.hasNext()) {
+			localPixel = itter.next();
+			medianFilterOnce(filter, new Pixel(
+					result, localPixel.getX(), localPixel.getY()));
 		}
-		return ConvolveLib.normalizeKernel(kernel);
+		workingImage_ = result;
 	}
 	
-	public static double[][] getW5Kernel() {
-		// from assignment
-		double[][] kernel = new double[][]{{1, 2, 1}, {2, 4, 2}, {1, 2, 1}};
+	/**
+	 * @param kernel : the kernel to convolve with
+	 * @param source : the data to convolve
+	 * @return returns an array with the same dimensions as source containing 
+	 *         the data in source convolved with the specified kernel
+	 */
+	public static double[][] convolveArrayPrimative(final double[][] kernel,
+			final double[][] source) {
+		double[][] result = new double[source.length][source[0].length];
 		
-		return normalizeKernel(kernel);
-	}
-	
-	public static double[][] getGaussKernel(int width, double numSigma) {
-		assert (width%2 == 1); // odd 
- 		double[][] kernel = new double[width][width];
- 		double sigma = (double)width/(2*numSigma);
- 		int offset = width/2;
-		
-		for (int x = 0; x < kernel.length; x++) {
-			for (int y = 0; y < kernel[0].length; y++) {
-				kernel[x][y] = gauss2D(x - offset, y - offset, sigma);
-			}
-		}
-		return normalizeKernel(kernel);
-	}
-	
-	
-	/* median filters */
-	
-	public static Boolean[][] getHFilter(int width) {
-		assert (width%2 == 1); // odd
-		Boolean[][] filter = new Boolean[width][1];
-		for (int i = 0; i < width; i++){
-			filter[i][0] = true;
-		}
-		return filter;
-	}
-	
-	public static Boolean[][] getVFilter(int height) {
-		assert (height%2 == 1); // odd
-		Boolean[][] filter = new Boolean[1][height];
-		for (int i = 0; i < height; i++) {
-			filter[0][i] = true;
-		}
-		return filter;
-	}
-	
-	public static Boolean[][] getSquareFilter(int sideLength) {
-		assert (sideLength%2 == 1); // odd
-		Boolean[][] filter = new Boolean[sideLength][sideLength];
-		for (int i = 0; i < sideLength; i++) {
-			for (int j = 0; j < sideLength; j++) {
-				filter[i][j] = true;
-			}
-		}
-		return filter;
-	}
-	
-	public static Boolean[][] getCrossFilter(int sideLength, int thickness) {
-		assert (sideLength%2 == 1); // odd
-		assert (thickness%2 == 1); // odd
-		Boolean[][] filter = new Boolean[sideLength][sideLength];
-		
-		// set all to false
-		for (int i = 0; i < filter.length; i++) {
-			for (int j = 0; j < filter[0].length; j++) {
-				filter[i][j] = false;
-			}
-		}
-		
-		// set the middle row
-		for (int i = 0; i < filter.length; i++) {
-			filter[i][filter[0].length/2] = true;
-		}
-		
-		// set the middle column
-		for (int i = 0; i < filter[0].length; i++) {
-			filter[filter.length/2][i] = true;
-		}
-		
-		return filter;
-	}
-	
-	/* private methods */
-	
-	/* generic helpers for creating kernels */
-	
-	private static double[][] normalizeKernel(double[][] kernel) {
-		double areaUnderCurve = ConvolveLib.integrate(kernel);
-		
-		for (int i = 0; i < kernel.length; i++) {
-			for (int j = 0; j < kernel[0].length; j++) {
-				kernel[i][j] /= areaUnderCurve;
-			}
-		}
-		
-		return kernel;
-	}
-	
-	private static double integrate(double[][] kernel) {
-		double result = 0;
-		
-		for (int i = 0; i < kernel.length; i++) {
-			for (int j = 0; j < kernel[0].length; j++) {
-				result += kernel[i][j];
+		for (int x = 0; x < result.length; x++) {
+			for (int y = 0; y < result[0].length; y++) {
+				ConvolutionProcessor.convolveOncePrimative(x, y, kernel, 
+						source, result);
 			}
 		}
 		
 		return result;
 	}
 	
-	
-	/* convolution helpers */
-	private void convolveOnce(double[][] kernel, Pixel outputPxm) {
-		int xNot = workingPxm_.getX();
-		int yNot = workingPxm_.getY();
-		int halfXLength = kernel.length/2;
-		int halfYLength = kernel[0].length/2;
-		int xIndex = 0;
-		int yIndex = 0;
+	public void gradient(double[][] xKernel, double[][] yKernel) {
 		
-		RawPixel pixel = new RawPixel(AbstractPixel.Mode.DOUBLE);
-		double weight = 0;
-		double areaUnderCurve = 0;
+	}
+		
+	/* convolution helpers */
+		
+	private void convolveOnce(double[][] kernel, Pixel outputPixel) {
+		double weight = 0.0;
+		double redSum = 0.0;
+		double greenSum = 0.0;
+		double blueSum = 0.0;
+		
+		Pixel workingPixel = new Pixel(workingImage_, outputPixel.getX(),
+											outputPixel.getY());
 		
 		for (int kernelX = 0; kernelX < kernel.length; kernelX++) {
-			xIndex = (xNot - halfXLength) + kernelX;
+			int xIndex = (outputPixel.getX() - kernel.length/2) + kernelX;
 			
 			for (int kernelY = 0; kernelY < kernel[0].length; kernelY++) {
-				yIndex = (yNot - halfYLength) + kernelY;
-				if ( !workingPxm_.inRange(xIndex, yIndex)) {
+				int yIndex = (outputPixel.getY() - kernel[0].length/2) + kernelY;
+				
+				if ( !workingPixel.inImage(xIndex, yIndex)) {
 					continue;
 				}
-				workingPxm_.focus(xIndex, yIndex);
+				workingPixel.moveTo(xIndex, yIndex);
 				weight = kernel[kernelX][kernelY];
-				areaUnderCurve += weight;
-				pixel.add(workingPxm_.getRawPixel().multiply(weight));
+				
+				RawPixel pixel = workingPixel.get();
+				
+				redSum += weight * pixel.getColorDouble(ColorField.RED);
+				greenSum += weight * pixel.getColorDouble(ColorField.GREEN);
+				blueSum += weight * pixel.getColorDouble(ColorField.BLUE);
 			}
 		}
+		RawPixel output = new RawPixel(RawPixel.Mode.DOUBLE);
 		
-		/* Ideally the area under the curve (of the kernel) would always be 1.0,
-		 * but when we are working near the edge of the image this is not the case
-		 * as some of the kernel gets 'cut off.' This manifests as color distortion
-		 * around the edges of the image. To fix this, we keep track of the
-		 * area under the part of the curve that we actually used and normalize
-		 * by it at the end. 
-		 */ 
-		pixel.divide(areaUnderCurve);
+		output.setColor(ColorField.RED, redSum);
+		output.setColor(ColorField.GREEN, greenSum);
+		output.setColor(ColorField.BLUE, blueSum);
 		
-		outputPxm.focus(xNot, yNot);
-		outputPxm.setRawPixel(pixel);
-		
-		/* return the pxm to where it was before this function call */
-		workingPxm_.focus(xNot, yNot);
+		outputPixel.set(output);
 	}
 	
-	
-	/* helper for getGaussKernel */
-	
-	private static double gauss2D(int x, int y, double sigma) {
-		double var = sigma * sigma;             // sigma squared
-		double a = 1.0/(sigma*Math.sqrt(2*Math.PI));  // coefficient
-		double exp = (double)(x*x)/(2.0 * var) + 
-					 (double)(y*y)/(2.0 * var);  // exponent
+	private void medianFilterOnce(Boolean[][] filter, Pixel outputPixel) {
+		Pixel workingPixel = new Pixel(workingImage_, outputPixel.getX(),
+										outputPixel.getY());
 		
-		return a * Math.pow(Math.E, - exp);
-	}
+		ArrayList<RawPixel> pixels = new ArrayList<RawPixel>();
+		
+		for (int filterX = 0; filterX < filter.length; filterX++) {
+			int xIndex = (outputPixel.getX() - filter.length/2) + filterX;
+			
+			for (int filterY = 0; filterY < filter[0].length; filterY++) {
+				int yIndex = (outputPixel.getY() - filter[0].length/2) + filterY;
+				
+				if (workingPixel.inImage(xIndex, yIndex)
+					&& filter[filterX][filterY]) {
+					workingPixel.moveTo(xIndex, yIndex);
+					pixels.add(workingPixel.get());
+				}
+			}
+		}
 
+		outputPixel.set(getMedianPixel(pixels));
+	}
+	
+	private RawPixel getMedianPixel(ArrayList<RawPixel> pixels) {
+		RawPixel median = new RawPixel();
+		HashMap<ColorField,int[]> colors = new HashMap<ColorField, int[]>();
+		
+		Iterator<ColorField> colorItter = RawPixel.iterator(false);
+		while (colorItter.hasNext()) {
+			ColorField localColor = colorItter.next();
+			int[] localCounts =  new int[pixels.size()];
+			
+			for (int i = 0; i < pixels.size(); i++) {
+				localCounts[i] = pixels.get(i).getColorInt(localColor);
+			}
+			colors.put(localColor, localCounts);
+		}
+		
+		// reset the iterator -- we're looping over the colors again
+		colorItter = RawPixel.iterator(false);
+		while (colorItter.hasNext()) {
+			ColorField localColor = colorItter.next();
+			int[] localCounts = colors.get(localColor);
+			Arrays.sort(localCounts);
+			
+			// get the middle value
+			median.setColor(localColor, localCounts[localCounts.length/2]);
+		}
+		
+		return median;
+	}
+	
+	/**
+	 * @param x : the x coordinate to center the kernel at
+	 * @param y : the y coordinate to center the kernel at
+	 * @param kernel : kernel to convolve with
+	 * @param source : data to convolve from
+	 * @param target : output gets written to target[x][y] 
+	 */
+	private static void convolveOncePrimative(final int x, final int y,
+			final double[][] kernel, final double[][] source, 
+			double[][] target) {
+		double sum = 0.0;
+				
+		for (int kernelX = 0; kernelX < kernel.length; kernelX++) {
+			int xIndex = (x - kernel.length/2) + kernelX;
+			for (int kernelY = 0; kernelY < kernel[0].length; kernelY++) {
+				int yIndex = (y - kernel[0].length/2) + kernelY;
+				
+				// ensure the indices are in bounds
+				if ( 0 <= xIndex && xIndex < source.length 
+						&& 0 <= yIndex && yIndex < source[0].length) {
+					sum += kernel[kernelX][kernelY] * source[xIndex][yIndex];
+				}
+			}
+		}		
+		target[x][y] = sum;
+	}
 }

@@ -1,12 +1,14 @@
 package iproc;
-import javax.imageio.ImageIO;
+
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-
+import javax.imageio.ImageIO;
 
 public class ImageProcessor {
 	
@@ -68,7 +70,7 @@ public class ImageProcessor {
 	 */	
 	public int readWorkingImage(File imageSource){
 		try {
-			workingImage_ = ImageIO.read(imageSource);
+			setImage(ImageIO.read(imageSource));
 			return 0;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -132,6 +134,7 @@ public class ImageProcessor {
 	 */
 	public void setImage(BufferedImage image) {
 		workingImage_ = image;
+		imageType_ = workingImage_.getType();
 	}
 	
 	
@@ -143,6 +146,16 @@ public class ImageProcessor {
 		return new BufferedImage(workingImage_.getWidth(), 
 				workingImage_.getHeight(), workingImage_.getType());
 	}
+	
+	public BufferedImage deepCopy() {
+		 ColorModel cm = workingImage_.getColorModel();
+		 boolean isAlphaPremultiplied = workingImage_.isAlphaPremultiplied();
+		 WritableRaster raster = workingImage_.copyData(null);
+		 
+		 return new BufferedImage(cm, raster, isAlphaPremultiplied, null)
+		 	.getSubimage(0, 0, workingImage_.getWidth(),
+		 		workingImage_.getHeight());
+		}
 	
 	private class PixelIterator implements Iterator<Pixel> {
 
@@ -158,13 +171,8 @@ public class ImageProcessor {
 
         @Override
         public boolean hasNext() {
-            if (y_ < image_.getHeight() - 1) {
-            	return true; 
-            } else if (x_ < image_.getWidth()) {
-            	return true;
-            } else {
-            	return false;
-            }
+            return (y_ < image_.getHeight() &&
+            		x_ < image_.getWidth());
         }
 
         @Override
