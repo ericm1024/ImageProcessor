@@ -25,8 +25,8 @@ public class LabEight {
 		File outputFile2 = new File(WORK_DIR+"w_5-high-pass.png");
 		File outputFile3 = new File(WORK_DIR+"w_5-high-boost.png");
 	
-		double[][] lpFilter = ConvolveLib.getW5Kernel();
-		double[][] apFilter = ConvolveLib.getApKernel(3);
+		double[][] lpFilter = ConvolveLib.KERNEL_LAB7_W5;
+		double[][] apFilter = ConvolveLib.KERNEL_ALLPASS_3;
 		double[][] hpFilter = ConvolveLib.kernelDifference(apFilter, lpFilter);
 		double[][] hbFilter = ConvolveLib.kernelSum(apFilter, 
 								ConvolveLib.multiplyScalar(
@@ -54,12 +54,12 @@ public class LabEight {
 		File outputFile2 = new File(WORK_DIR+"intensity-high-pass.png");
 		File outputFile3 = new File(WORK_DIR+"intensity-high-boost.png");
 	
-		double[][] lpFilter = ConvolveLib.getW5Kernel();
-		double[][] apFilter = ConvolveLib.getApKernel(3);
+		double[][] lpFilter = ConvolveLib.KERNEL_LAB7_W5;
+		double[][] apFilter = ConvolveLib.KERNEL_ALLPASS_3;
 		double[][] hpFilter = ConvolveLib.kernelDifference(apFilter, lpFilter);
 		double[][] hbFilter = ConvolveLib.kernelSum(apFilter, 
 								ConvolveLib.multiplyScalar(
-								ConvolveLib.getW5Kernel(), 2.0/9.0));
+								ConvolveLib.KERNEL_LAB7_W5, 2.0/9.0));
 		
 		// low pass filtering
 		cproc.readWorkingImage(baseFile);
@@ -86,22 +86,22 @@ public class LabEight {
 	
 		// roberts 
 		cproc.readWorkingImage(baseFile);
-		cproc.gradient(ConvolveLib.getRobertsX(), ConvolveLib.getRobertsY());
+		cproc.gradient(ConvolveLib.GRAD_ROBERTS_X, ConvolveLib.GRAD_ROBERTS_Y);
 		cproc.writeWorkingImage(outputFile1);
 		
 		// sobel
 		cproc.readWorkingImage(baseFile);
-		cproc.gradient(ConvolveLib.getSobelX(), ConvolveLib.getSobelY());
+		cproc.gradient(ConvolveLib.GRAD_SOBEL_X, ConvolveLib.GRAD_SOBEL_Y);
 		cproc.writeWorkingImage(outputFile2);
 		
 		// prewitt 3x3
 		cproc.readWorkingImage(baseFile);
-		cproc.gradient(ConvolveLib.getPrewittX3(), ConvolveLib.getPrewittY3());
+		cproc.gradient(ConvolveLib.GRAD_PREWITT_X_3, ConvolveLib.GRAD_PREWITT_Y_3);
 		cproc.writeWorkingImage(outputFile3);
 		
 		// prewitt 4x4
 		cproc.readWorkingImage(baseFile);
-		cproc.gradient(ConvolveLib.getPrewittX4(), ConvolveLib.getPrewittY4());
+		cproc.gradient(ConvolveLib.GRAD_PREWITT_X_4, ConvolveLib.GRAD_PREWITT_Y_4);
 		cproc.writeWorkingImage(outputFile4);
 	}
 	
@@ -114,26 +114,26 @@ public class LabEight {
 	
 		// north 
 		cproc.readWorkingImage(baseFile);
-		cproc.convolve(ConvolveLib.getCompassNorth());
+		cproc.convolve(ConvolveLib.GRAD_COMP_N_3);
 		cproc.writeWorkingImage(outputFile1);
 		
 		// east
 		cproc.readWorkingImage(baseFile);
-		cproc.convolve(ConvolveLib.getCompassEast());
+		cproc.convolve(ConvolveLib.GRAD_COMP_E_3);
 		cproc.writeWorkingImage(outputFile2);
 		
 		// south
 		cproc.readWorkingImage(baseFile);
-		cproc.convolve(ConvolveLib.getCompassSouth());
+		cproc.convolve(ConvolveLib.GRAD_COMP_S_3);
 		cproc.writeWorkingImage(outputFile3);
 		
 		// west
 		cproc.readWorkingImage(baseFile);
-		cproc.convolve(ConvolveLib.getCompassWest());
+		cproc.convolve(ConvolveLib.GRAD_COMP_W_3);
 		cproc.writeWorkingImage(outputFile4);
 	}
 	
-	private static void convolveIntensity(BufferedImage img, double[][] kernel) {
+	private static void convolveIntensity(BufferedImage img, final double[][] kernel) {
 		ColorspaceProcessor colorProc = new ColorspaceProcessor(img); 
 		double[][][] hsi = colorProc.getHsi();
 		

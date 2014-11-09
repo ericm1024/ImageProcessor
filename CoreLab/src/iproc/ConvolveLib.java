@@ -89,27 +89,40 @@ public class ConvolveLib {
 	
 	/* assignment specific */
 	
+	
+	public static final double[][] KERNEL_LAB7_W5 = {{1,2,1}, {2,4,2}, {1,2,1}};
+	
 	// from assignment 7 
 	public static double[][] getW5Kernel() {
 		
-		double[][] kernel = new double[][]{{1, 2, 1}, {2, 4, 2}, {1, 2, 1}};
+		double[][] kernel = new double[][]{{1,2,1}, {2,4,2}, {1,2,1}};
 		
 		return normalizeKernel(kernel);
 	}
 	
+	public static double[][] KERNEL_LAB8_HB1 = {{-1,-1,-1}, {-1,8,-1}, {-1,-1,-1}};
+	
 	// from assignment 8
 	public static double[][] getHbKernel() {
 			
-		double[][] kernel = new double[][]{{-1, -1, -1}, {-1, 8, -1}, {-1, -1, -1}};
+		double[][] kernel = new double[][]{{-1,-1,-1}, {-1,8,-1}, {-1,-1,-1}};
 		
 		return kernel;
 	}
+	
+	public static double[][] KERNEL_LAB8_HB2 = {{0,-1,0}, {-1,4,-1}, {0,-1,0}};
+			
 	public static double[][] getHbKernel2() {
 		
-		double[][] kernel = new double[][]{{0, -1, 0}, {-1, 4, -1}, {0, -1, 0}};
+		double[][] kernel = new double[][]{{0,-1,0}, {-1,4,-1}, {0,-1,0}};
 		
 		return kernel;
 	}
+	
+	public static double[][] KERNEL_ALLPASS_3 = {{0,0,0}, {0,1,0}, {0,0,0}};
+	
+	public static double[][] KERNEL_ALLPASS_5 = {{0,0,0,0,0}, {0,0,0,0,0},
+		{0,0,1,0,0}, {0,0,0,0,0}, {0,0,0,0,0}};
 	
 	public static double[][] getApKernel(int width) {
 		assert (width%2 == 1); // odd
@@ -220,54 +233,86 @@ public class ConvolveLib {
 	
 	/* gradient kernels */
 	
+	public static final double[][] GRAD_ROBERTS_X = {{-1, 1}, {0,0}};
+	
 	public static double[][] getRobertsX() {
-		return new double[][]{{-1,1},{0,0}};
+		return new double[][]{{-1,1}, {0,0}};
 	}
+	
+	public static final double[][] GRAD_ROBERTS_Y = {{-1,0}, {1,0}};
 	
 	public static double[][] getRobertsY() {
-		return new double[][]{{-1,0},{1,0}};
+		return new double[][]{{-1,0}, {1,0}};
 	}
+	
+	public static final double[][] GRAD_SOBEL_X = {{-1,0,1}, {-2,0,2},
+		{-1,0,1}};
 	
 	public static double[][] getSobelX() {
-		return new double[][]{{-1,0,1},{-2,0,2},{-1,0,1}};
+		return new double[][]{{-1,0,1}, {-2,0,2}, {-1,0,1}};
 	}
+	
+	public static final double[][] GRAD_SOBEL_Y = {{-1,-2,1}, {0,0,0},
+		{1,2,1}};
 	
 	public static double[][] getSobelY() {
-		return new double[][]{{-1,-2,1},{0,0,0},{1,2,1}};
+		return new double[][]{{-1,-2,1}, {0,0,0}, {1,2,1}};
 	}
+	
+	public static final double[][] GRAD_PREWITT_X_3 = {{-1,0,1}, {-1,0,1},
+		{-1,0,1}};
 	
 	public static double[][] getPrewittX3() {
-		return new double[][]{{-1,0,1},{-1,0,1},{-1,0,1}};
+		return new double[][]{{-1,0,1}, {-1,0,1}, {-1,0,1}};
 	}
+	
+	public static final double[][] GRAD_PREWITT_Y_3 = {{-1,-1,-1}, {0,0,0},
+		{1,1,1}}; 
 	
 	public static double[][] getPrewittY3() {
-		return new double[][]{{-1,-1,-1},{0,0,0},{1,1,1}};
+		return new double[][]{{-1,-1,-1}, {0,0,0}, {1,1,1}};
 	}
+	
+	public static final double[][] GRAD_PREWITT_X_4 = {{-3,-1,1,3},
+		{-3,-1,1,3}, {-3,-1,1,3}, {-3,-1,1,3}};
 	
 	public static double[][] getPrewittX4() {
-		return new double[][]{{-3,-1,1,3},{-3,-1,1,3},{-3,-1,1,3},{-3,-1,1,3}};
+		return new double[][]{{-3,-1,1,3}, {-3,-1,1,3}, {-3,-1,1,3},
+				{-3,-1,1,3}};
 	}
 	
+	public static final double[][] GRAD_PREWITT_Y_4 = {{-3,-3,-3,-3},
+		{-1,-1,-1,-1}, {1,1,1,1}, {3,3,3,3}};
+	
 	public static double[][] getPrewittY4() {
-		return new double[][]{{-3,-3,-3,-3},{-1,-1,-1,-1},{1,1,1,1},{3,3,3,3}};
+		return new double[][]{{-3,-3,-3,-3}, {-1,-1,-1,-1}, {1,1,1,1},
+				{3,3,3,3}};
 	}
 	
 	/* compass operators */
 	
+	public static final double[][] GRAD_COMP_E_3 = {{-1,0,1}, {-1,0,1}, {-1,0,1}};
+	
 	public static double[][] getCompassEast() {
-		return new double[][]{{-1,0,1},{-1,0,1},{-1,0,1}};
+		return new double[][]{{-1,0,1}, {-1,0,1}, {-1,0,1}};
 	}
+	
+	public static final double[][] GRAD_COMP_W_3 = {{1,0,-1}, {1,0,-1}, {1,0,-1}};
 	
 	public static double[][] getCompassWest() {
-		return new double[][]{{1,0,-1},{1,0,-1},{1,0,-1}};
+		return new double[][]{{1,0,-1}, {1,0,-1}, {1,0,-1}};
 	}
+	
+	public static final double[][] GRAD_COMP_N_3 = {{1,1,1}, {0,0,0}, {-1,-1,-1}};
 	
 	public static double[][] getCompassNorth() {
-		return new double[][]{{1,1,1},{0,0,0},{-1,-1,-1}};
+		return new double[][]{{1,1,1}, {0,0,0}, {-1,-1,-1}};
 	}
 	
+	public static final double[][] GRAD_COMP_S_3 = {{-1,-1,-1}, {0,0,0}, {1,1,1}};
+	
 	public static double[][] getCompassSouth() {
-		return new double[][]{{-1,-1,-1},{0,0,0},{1,1,1}};
+		return new double[][]{{-1,-1,-1}, {0,0,0}, {1,1,1}};
 	}
 	
 	/* private methods */
