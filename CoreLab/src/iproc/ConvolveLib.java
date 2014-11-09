@@ -219,6 +219,7 @@ public class ConvolveLib {
 	}
 	
 	/* gradient kernels */
+	
 	public static double[][] getRobertsX() {
 		return new double[][]{{-1,1},{0,0}};
 	}
@@ -249,6 +250,24 @@ public class ConvolveLib {
 	
 	public static double[][] getPrewittY4() {
 		return new double[][]{{-3,-3,-3,-3},{-1,-1,-1,-1},{1,1,1,1},{3,3,3,3}};
+	}
+	
+	/* compass operators */
+	
+	public static double[][] getCompassEast() {
+		return new double[][]{{-1,0,1},{-1,0,1},{-1,0,1}};
+	}
+	
+	public static double[][] getCompassWest() {
+		return new double[][]{{1,0,-1},{1,0,-1},{1,0,-1}};
+	}
+	
+	public static double[][] getCompassNorth() {
+		return new double[][]{{1,1,1},{0,0,0},{-1,-1,-1}};
+	}
+	
+	public static double[][] getCompassSouth() {
+		return new double[][]{{-1,-1,-1},{0,0,0},{1,1,1}};
 	}
 	
 	/* private methods */

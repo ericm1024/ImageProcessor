@@ -169,6 +169,24 @@ public class ColorspaceProcessor extends ImageProcessor{
 		return rgb;
 	}
 	
+	public double[][] getGreyscale() {
+		double[][] greyscale = new double[workingImage_.getWidth()]
+				[workingImage_.getHeight()];
+		
+		Iterator<Pixel> pixItter = iterator();
+		while (pixItter.hasNext()) {
+			Pixel pix = pixItter.next();
+			RawPixel rawPix = pix.get();
+			
+			greyscale[pix.getX()][pix.getY()] = (
+					( rawPix.getColorDouble(RawPixel.ColorField.RED)
+					+ rawPix.getColorDouble(RawPixel.ColorField.GREEN)
+					+ rawPix.getColorDouble(RawPixel.ColorField.BLUE)
+					) / 3.0);
+		}		
+		return greyscale;
+	}
+	
 	public void setFromRgb(double[][][] rgb) {
 		Iterator<Pixel> pixItter = iterator();
 		while (pixItter.hasNext()) {
@@ -180,6 +198,24 @@ public class ColorspaceProcessor extends ImageProcessor{
 			rawPix.setColor(RawPixel.ColorField.RED, rgb[0][x][y]);
 			rawPix.setColor(RawPixel.ColorField.GREEN, rgb[1][x][y]);
 			rawPix.setColor(RawPixel.ColorField.BLUE, rgb[2][x][y]);
+			
+			pix.set(rawPix);
+		}
+	}
+	
+	public void setFromGreyscale(double[][] greyscale) {
+		Iterator<Pixel> pixItter = iterator();
+		while (pixItter.hasNext()) {
+			Pixel pix = pixItter.next();
+			RawPixel rawPix = pix.get();
+			int x = pix.getX();
+			int y = pix.getY();
+			
+			rawPix.setColor(RawPixel.ColorField.RED, greyscale[x][y]);
+			rawPix.setColor(RawPixel.ColorField.GREEN, greyscale[x][y]);
+			rawPix.setColor(RawPixel.ColorField.BLUE, greyscale[x][y]);
+			
+			pix.set(rawPix);
 		}
 	}
 	

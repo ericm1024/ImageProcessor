@@ -80,8 +80,8 @@ public class ConvolutionProcessor extends ImageProcessor {
 		
 		for (int x = 0; x < result.length; x++) {
 			for (int y = 0; y < result[0].length; y++) {
-				ConvolutionProcessor.convolveOncePrimative(x, y, kernel, 
-						source, result);
+				result[x][y] = ConvolutionProcessor
+						.convolveOncePrimative(x, y, kernel, source);
 			}
 		}
 		
@@ -89,7 +89,22 @@ public class ConvolutionProcessor extends ImageProcessor {
 	}
 	
 	public void gradient(double[][] xKernel, double[][] yKernel) {
-		
+		ColorspaceProcessor cproc = new ColorspaceProcessor(workingImage_);
+		double[][] greyscale = cproc.getGreyscale();
+		double[][] magnitude = new double[greyscale.length][greyscale[0].length];
+	
+		for (int x = 0; x < magnitude.length; x++) {
+			for (int y = 0; y < magnitude[0].length; y++) {
+				double xmag = ConvolutionProcessor
+						.convolveOncePrimative(x, y, xKernel, greyscale);
+				
+				double ymag = ConvolutionProcessor
+						.convolveOncePrimative(x, y, yKernel, greyscale);
+				
+				magnitude[x][y] = Math.sqrt(xmag*xmag + ymag*ymag);
+			}
+		}
+		cproc.setFromGreyscale(magnitude);
 	}
 		
 	/* convolution helpers */
@@ -188,11 +203,10 @@ public class ConvolutionProcessor extends ImageProcessor {
 	 * @param y : the y coordinate to center the kernel at
 	 * @param kernel : kernel to convolve with
 	 * @param source : data to convolve from
-	 * @param target : output gets written to target[x][y] 
+	 * @return the new value at x,y after convolution
 	 */
-	private static void convolveOncePrimative(final int x, final int y,
-			final double[][] kernel, final double[][] source, 
-			double[][] target) {
+	private static double convolveOncePrimative(final int x, final int y,
+			final double[][] kernel, final double[][] source) {
 		double sum = 0.0;
 				
 		for (int kernelX = 0; kernelX < kernel.length; kernelX++) {
@@ -207,6 +221,6 @@ public class ConvolutionProcessor extends ImageProcessor {
 				}
 			}
 		}		
-		target[x][y] = sum;
+		return sum;
 	}
 }
