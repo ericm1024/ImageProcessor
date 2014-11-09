@@ -1,0 +1,21 @@
+* change all double[][]s to float[][]s
+	performance. double precision is not necessary when we're working
+	with 8 bit color. (i.e. 32 bits of entropy is completely sufficient
+	for storing what amounts to 8 bits of entropy)
+
+* create a kernel class, make kernels matrices
+	methods:
+		Kernel(Matrix kernel, String name) 
+	members:
+		public String name
+		
+* add higher level methods to Pixel.
+	getRed, getGreen, getBlue, getAlpha
+	getRedFloat, getGreenFloat, getBlueFloat, getAlphaFloat
+	
+* add generalization to RawPixel
+	Use color itter to allow pixels with or without alpha.
+	Use validation methods to allow 'safe' or 'unsafe' pixels, i.e.
+		ones that boundary check and ones that do not.
+
+* implement matrix multiplication

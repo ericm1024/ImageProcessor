@@ -11,13 +11,22 @@ public class ConvolveLib {
 	
 	/* lab 8 */
 	
-	public static double[][] KERNEL_LAB8_HB1 =
+	public static final double[][] KERNEL_LAB8_HB1 =
 		{{-1,-1,-1}, {-1,8,-1}, {-1,-1,-1}};
 	
-	public static double[][] KERNEL_LAB8_HB2 =
+	public static final double[][] KERNEL_LAB8_HB2 =
 		{{0,-1,0}, {-1,4,-1}, {0,-1,0}};
 	
+	/* lab 9 */
 	
+	public static final double[][] KERNEL_LAB9_LAPLACE_1 = 
+		{{0,1,0}, {1,-4,1}, {0,1,0}};
+	
+	public static final double[][] KERNEL_LAB9_LAPLACE_2 =
+		{{-1,-1,-1}, {-1,8,-1}, {-1,-1,-1}};
+	
+	public static final double[][] KERNEL_LAB9_LAPLACE_OF_GAUSS_5 =
+		{{0,0,1,0,0}, {0,1,2,1,0}, {1,2,-16,2,1}, {0,1,2,1,0}, {0,0,1,0,0}};
 	
 	/* gradient kernels */
 	
