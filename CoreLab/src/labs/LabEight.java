@@ -30,7 +30,7 @@ public class LabEight {
 		double[][] hpFilter = ConvolveLib.kernelDifference(apFilter, lpFilter);
 		double[][] hbFilter = ConvolveLib.kernelSum(apFilter, 
 								ConvolveLib.multiplyScalar(
-								ConvolveLib.getW5Kernel(), 2.0/9.0));
+								ConvolveLib.KERNEL_LAB7_W5, 2.0/9.0));
 				
 		// low pass filtering
 		cproc.readWorkingImage(baseFile);
