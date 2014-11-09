@@ -1,5 +1,6 @@
 package labs;
-import ImageProcessor;
+
+import iproc.ImageProcessor;
 import iproc.HistogramProcessor;
 
 import java.io.File;
@@ -10,7 +11,6 @@ public class LabFive {
 	public static File baseFile = new File(WORK_DIR+"LennaG.png");
 	
 	private static LabFiveProcessor proc5 = new LabFiveProcessor();
-	// for histogram functions
 	private static HistogramProcessor procH = new HistogramProcessor();
 	
 	public static void main(String args[]) {
@@ -28,8 +28,8 @@ public class LabFive {
 		procH.readWorkingImage(baseFile);
 		
 		proc5.writeWorkingImage(outputFile1);
-		ImageProcessor.writeImage(procH.histogram(), outputFile2);
-		ImageProcessor.writeImage(procH.cumulativeHistogram(), outputFile3);
+		ImageProcessor.writeImage(procH.histogramRgb(), outputFile2);
+		ImageProcessor.writeImage(procH.cumulativeHistogramRgb(), outputFile3);
 	}
 	
 		
@@ -42,8 +42,8 @@ public class LabFive {
 		ImageProcessor.writeImage(proc5.histogramSpec(problemTwoHistogram()), outputFile1);
 		
 		procH.readWorkingImage(outputFile1);
-		ImageProcessor.writeImage(procH.histogram(), outputFile3);
-		ImageProcessor.writeImage(procH.cumulativeHistogram(), outputFile5);
+		ImageProcessor.writeImage(procH.histogramRgb(), outputFile3);
+		ImageProcessor.writeImage(procH.cumulativeHistogramRgb(), outputFile5);
 	}
 
 	
@@ -56,8 +56,8 @@ public class LabFive {
 		ImageProcessor.writeImage(proc5.histogramSpec(problemThreeHistogram()), outputFile1);
 		
 		procH.readWorkingImage(outputFile1);
-		ImageProcessor.writeImage(procH.histogram(), outputFile3);
-		ImageProcessor.writeImage(procH.cumulativeHistogram(), outputFile5);
+		ImageProcessor.writeImage(procH.histogramRgb(), outputFile3);
+		ImageProcessor.writeImage(procH.cumulativeHistogramRgb(), outputFile5);
 	}
 	
 	

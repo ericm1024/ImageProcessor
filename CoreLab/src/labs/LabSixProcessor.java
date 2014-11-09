@@ -1,14 +1,15 @@
 package labs;
-import HSI;
-import ImageProcessor;
-import RGB;
+
 import iproc.Pixel;
+import iproc.RawPixel;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Iterator;
 	
-public class LabSixProcessor extends ImageProcessor{
+public class LabSixProcessor extends iproc.ImageProcessor{
 
+	private static final double TAU = 2*Math.PI;
 	
 	/* constructors */
 	/**
@@ -48,26 +49,23 @@ public class LabSixProcessor extends ImageProcessor{
 		
 		for (int x = 0; x < workingImage_.getWidth(); x++) {
 			for (int y = 0; y < workingImage_.getHeight(); y++) {
-				localP = new Pixel(workingImage_.getRGB(x,y));
+				localP = new Pixel(workingImage_, x, y);
+				RawPixel localRaw = localP.get();
 
 				// get HSI values
-				hsi = RGBtoHSI((double)localP.getRed()/(double)NUM_COLORS,
-						 	   (double)localP.getGreen()/(double)NUM_COLORS, 
-						 	   (double)localP.getBlue()/(double)NUM_COLORS);
+				hsi = RGBtoHSI(localRaw.getColorDouble(RawPixel.ColorField.RED),
+							   localRaw.getColorDouble(RawPixel.ColorField.GREEN),
+							   localRaw.getColorDouble(RawPixel.ColorField.BLUE));
 				
 				// rotate the hue
-				hsi.H(getEquivClass(hsi.H() + Theta));
+				hsi.h = getEquivClass(hsi.h + Theta);
 				
 				// transform hsi values back to rgb
-				rgb = HSItoRGB(hsi.H(), hsi.S(), hsi.I());
+				rgb = HSItoRGB(hsi.h, hsi.s, hsi.i);
 				
 				// update the pixel with the new rgb value
-				localP.clear();
-				localP.setRGB((int)(rgb.R()*NUM_COLORS), 
-						      (int)(rgb.G()*NUM_COLORS), 
-						      (int)(rgb.B()*NUM_COLORS));
-				
-				workingImage_.setRGB(x,y,localP.getRGB());
+				localRaw.setColorAll(rgb.r, rgb.g, rgb.b, 1.0);
+				localP.set(localRaw);
 			}
 		}
 	}
@@ -80,26 +78,23 @@ public class LabSixProcessor extends ImageProcessor{
 		
 		for (int x = 0; x < workingImage_.getWidth(); x++) {
 			for (int y = 0; y < workingImage_.getHeight(); y++) {
-				localP = new Pixel(workingImage_.getRGB(x,y));
+				localP = new Pixel(workingImage_, x, y);
+				RawPixel localRaw = localP.get();
 
 				// get HSI values
-				hsi = RGBtoHSI((double)localP.getRed()/(double)NUM_COLORS,
-						 	   (double)localP.getGreen()/(double)NUM_COLORS, 
-						 	   (double)localP.getBlue()/(double)NUM_COLORS);
+				hsi = RGBtoHSI(localRaw.getColorDouble(RawPixel.ColorField.RED),
+							   localRaw.getColorDouble(RawPixel.ColorField.GREEN),
+							   localRaw.getColorDouble(RawPixel.ColorField.BLUE));
 				
 				// modify the saturation
-				hsi.S(hsi.S() + deltaS);
+				hsi.s = hsi.s + deltaS;
 				
 				// transform hsi values back to rgb
-				rgb = HSItoRGB(hsi.H(), hsi.S(), hsi.I());
+				rgb = HSItoRGB(hsi.h, hsi.s, hsi.i);
 				
 				// update the pixel with the new rgb value
-				localP.clear();
-				localP.setRGB((int)(rgb.R()*NUM_COLORS), 
-						      (int)(rgb.G()*NUM_COLORS), 
-						      (int)(rgb.B()*NUM_COLORS));
-				
-				workingImage_.setRGB(x,y,localP.getRGB());
+				localRaw.setColorAll(rgb.r, rgb.g, rgb.b, 1.0);			
+				localP.set(localRaw);
 			}
 		}
 	}
@@ -114,26 +109,95 @@ public class LabSixProcessor extends ImageProcessor{
 		
 		for (int x = 0; x < workingImage_.getWidth(); x++) {
 			for (int y = 0; y < workingImage_.getHeight(); y++) {
-				localP = new Pixel(workingImage_.getRGB(x,y));
+				localP = new Pixel(workingImage_, x, y);
+				RawPixel localRaw = localP.get();
 
 				// get HSI values
-				hsi = RGBtoHSI((double)localP.getRed()/(double)NUM_COLORS,
-						 	   (double)localP.getGreen()/(double)NUM_COLORS, 
-						 	   (double)localP.getBlue()/(double)NUM_COLORS);
+				hsi = RGBtoHSI(localRaw.getColorDouble(RawPixel.ColorField.RED),
+							   localRaw.getColorDouble(RawPixel.ColorField.GREEN),
+							   localRaw.getColorDouble(RawPixel.ColorField.BLUE));
 				
-				hsi.I((hsi.I() - minI)/(maxI - minI));
+				hsi.i = (hsi.i - minI)/(maxI - minI);
 				
 				// transform hsi values back to rgb
-				rgb = HSItoRGB(hsi.H(), hsi.S(), hsi.I());
+				rgb = HSItoRGB(hsi.h, hsi.s, hsi.i);
 				
 				// update the pixel with the new rgb value
-				localP.clear();
-				localP.setRGB((int)(rgb.R()*NUM_COLORS), 
-						      (int)(rgb.G()*NUM_COLORS), 
-						      (int)(rgb.B()*NUM_COLORS));
-				
-				workingImage_.setRGB(x,y,localP.getRGB());
+				localRaw.setColorAll(rgb.r, rgb.g, rgb.b, 1.0);
+				localP.set(localRaw);
 			}
+		}
+	}
+	
+	public double[][][] getHsi() {
+		double[][][] hsi = new double[3][workingImage_.getWidth()]
+				[workingImage_.getHeight()];
+		
+		double[][][] rgb = getRgb();
+		
+		for (int x = 0; x < hsi[0].length; x++) {
+			for (int y = 0; y < hsi[0][0].length; y++) {
+				HSI localHsi = RGBtoHSI(rgb[0][x][y], rgb[1][x][y], rgb[2][x][y]);
+				
+				hsi[0][x][y] = localHsi.h;
+				hsi[1][x][y] = localHsi.s;
+				hsi[2][x][y] = localHsi.i;
+			}
+		}
+		return hsi;
+	}
+	
+	public double[][][] getRgb() {
+		double[][][] rgb = new double[3][workingImage_.getWidth()]
+				[workingImage_.getHeight()];
+		
+		Iterator<Pixel> pixItter = iterator();
+		while (pixItter.hasNext()) {
+			Pixel pix = pixItter.next();
+			RawPixel rawPix = pix.get();
+			
+			rgb[0][pix.getX()][pix.getY()] =
+					rawPix.getColorDouble(RawPixel.ColorField.RED);
+			
+			rgb[1][pix.getX()][pix.getY()] =
+					rawPix.getColorDouble(RawPixel.ColorField.GREEN);
+			
+			rgb[2][pix.getX()][pix.getY()] =
+					rawPix.getColorDouble(RawPixel.ColorField.BLUE);
+		}
+		
+		return rgb;
+	}
+	
+	public void setFromRgb(double[][][] rgb) {
+		Iterator<Pixel> pixItter = iterator();
+		while (pixItter.hasNext()) {
+			Pixel pix = pixItter.next();
+			RawPixel rawPix = pix.get();
+			int x = pix.getX();
+			int y = pix.getY();
+			
+			rawPix.setColor(RawPixel.ColorField.RED, rgb[0][x][y]);
+			rawPix.setColor(RawPixel.ColorField.GREEN, rgb[1][x][y]);
+			rawPix.setColor(RawPixel.ColorField.BLUE, rgb[2][x][y]);
+		}
+	}
+	
+	public void setFromHsi(double[][][] hsi) {
+		Iterator<Pixel> pixItter = iterator();
+		while (pixItter.hasNext()) {
+			Pixel pix = pixItter.next();
+			RawPixel rawPix = pix.get();
+			int x = pix.getX();
+			int y = pix.getY();
+			
+			RGB localRgb = HSItoRGB(hsi[0][x][y], hsi[1][x][y], hsi[2][x][y]);
+			
+			rawPix.setColor(RawPixel.ColorField.RED, localRgb.r);
+			rawPix.setColor(RawPixel.ColorField.GREEN, localRgb.g);
+			rawPix.setColor(RawPixel.ColorField.BLUE, localRgb.b);
+			
+			pix.set(rawPix);
 		}
 	}
 	
@@ -146,14 +210,14 @@ public class LabSixProcessor extends ImageProcessor{
 		double r, g, b, w, i;
 		
 		i = R + G + B;
-		hsi.I(i/3.0);
+		hsi.i = i/3.0;
 		r = R/i;
 		g = G/i;
 		b = B/i;
 		
 		if (R == G && G == B){
-			hsi.S(0.0);
-			hsi.H(0.0);
+			hsi.s = 0.0;
+			hsi.h = 0.0;
 		} else {
 			w = 0.5*(2*R - G - B)/Math.sqrt((R-G)*(R-G) + (R-B)*(G-B));
 			if (w > 1) {
@@ -161,14 +225,14 @@ public class LabSixProcessor extends ImageProcessor{
 			} else if (w < -1) {
 				w = -1;
 			}
-			hsi.H(Math.acos(w));
-			if (hsi.H() < 0) {
+			hsi.h = Math.acos(w);
+			if (hsi.h < 0) {
 				System.err.print("LabSixProcessor.RHBtoHSI: error. got H < 0\n");
 			}
 			if (B > G) {
-				hsi.H(TAU - hsi.H());
+				hsi.h = TAU - hsi.h;
 			}
-			hsi.S(1 - 3*minThree(r,g,b));
+			hsi.s = 1 - 3*minThree(r,g,b);
 		}
 		return hsi;
 	}
@@ -177,7 +241,6 @@ public class LabSixProcessor extends ImageProcessor{
 	private RGB HSItoRGB(double H, double S, double I) {
 		RGB rgb = new RGB(0,0,0);
 		
-		double t = TAU;
 		double r = 0;
 		double g = 0;
 		double b = 0;
@@ -189,9 +252,9 @@ public class LabSixProcessor extends ImageProcessor{
 			I = 1;
 		}
 		if (S == 0) {
-			rgb.R(I);
-			rgb.G(I);
-			rgb.B(I);
+			rgb.r = I;
+			rgb.g = I;
+			rgb.b = I;
 		} else {
 			if ( H < 0 ){
 				System.err.print("LabSixProcessor.HSItoRGB: error. got H < 0.\n");
@@ -224,17 +287,18 @@ public class LabSixProcessor extends ImageProcessor{
 			if (b < 0) {
 				b = 0;
 			}
-			rgb.R( 3*I*r );
-			rgb.G( 3*I*g );
-			rgb.B( 3*I*b );
-			if (rgb.R() > 1) {
-				rgb.R(1.0);
+			rgb.r = 3*I*r;
+			rgb.g = 3*I*g;
+			rgb.b = 3*I*b;
+			
+			if (rgb.r > 1) {
+				rgb.r = 1.0;
 			}
-			if (rgb.G() > 1) {
-				rgb.G(1.0);
+			if (rgb.g > 1) {
+				rgb.g = 1.0;
 			}
-			if (rgb.B() > 1) {
-				rgb.B(1.0);
+			if (rgb.b > 1) {
+				rgb.b = 1.0;
 			}
 		}
 		return rgb;
@@ -251,15 +315,16 @@ public class LabSixProcessor extends ImageProcessor{
 		
 		for (int x = 0; x < workingImage_.getWidth(); x++) {
 			for (int y = 0; y < workingImage_.getHeight(); y++) {
-				localP = new Pixel(workingImage_.getRGB(x,y));
+				localP = new Pixel(workingImage_, x, y);
+				RawPixel localRaw = localP.get();
 
 				// get HSI values
-				hsi = RGBtoHSI((double)localP.getRed()/(double)NUM_COLORS,
-						 	   (double)localP.getGreen()/(double)NUM_COLORS, 
-						 	   (double)localP.getBlue()/(double)NUM_COLORS);
+				hsi = RGBtoHSI(localRaw.getColorDouble(RawPixel.ColorField.RED),
+							   localRaw.getColorDouble(RawPixel.ColorField.GREEN),
+							   localRaw.getColorDouble(RawPixel.ColorField.BLUE));
 				
-				if (hsi.I() < min) {
-					min = hsi.I();
+				if (hsi.i < min) {
+					min = hsi.i;
 				}
 			}
 		}
@@ -274,15 +339,16 @@ public class LabSixProcessor extends ImageProcessor{
 		
 		for (int x = 0; x < workingImage_.getWidth(); x++) {
 			for (int y = 0; y < workingImage_.getHeight(); y++) {
-				localP = new Pixel(workingImage_.getRGB(x,y));
+				localP = new Pixel(workingImage_, x, y);
+				RawPixel localRaw = localP.get();
 
 				// get HSI values
-				hsi = RGBtoHSI((double)localP.getRed()/(double)NUM_COLORS,
-						 	   (double)localP.getGreen()/(double)NUM_COLORS, 
-						 	   (double)localP.getBlue()/(double)NUM_COLORS);
+				hsi = RGBtoHSI(localRaw.getColorDouble(RawPixel.ColorField.RED),
+						   localRaw.getColorDouble(RawPixel.ColorField.GREEN),
+						   localRaw.getColorDouble(RawPixel.ColorField.BLUE));
 				
-				if (hsi.I() > max) {
-					max = hsi.I();
+				if (hsi.i > max) {
+					max = hsi.i;
 				}
 			}
 		}
@@ -309,5 +375,43 @@ public class LabSixProcessor extends ImageProcessor{
 		}
 		
 		return newTheta; 
+	}
+	
+	
+ 	
+	private class RGB {
+		public double r = 0.0;
+		public double g = 0.0;
+		public double b = 0.0;
+		
+		public RGB(double red, double green, double blue) {
+			r = red;
+			g = green;
+			b = blue;
+		}
+		
+		public RGB() {
+			r = 0.0;
+			g = 0.0;
+			b = 0.0;
+		}
+	}
+	
+	private class HSI {
+		public double h = 0.0;
+		public double s = 0.0;
+		public double i = 0.0;
+		
+		public HSI(double hue, double sat, double intensity) {
+			h = hue;
+			s = sat;
+			i = intensity;
+		}
+		
+		public HSI() {
+			h = 0.0;
+			s = 0.0;
+			i = 0.0;
+		}
 	}
 }

@@ -1,5 +1,5 @@
 package labs;
-import ImageProcessor;
+import iproc.ImageProcessor;
 import iproc.Pixel;
 
 import java.awt.image.BufferedImage;
