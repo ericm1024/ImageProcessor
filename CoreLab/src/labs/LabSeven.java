@@ -23,7 +23,7 @@ public class LabSeven {
 		File outputFile1 = new File(WORK_DIR+"w_5-kernel.png");
 		
 		proc7.readWorkingImage(baseFile);
-		proc7.convolve(ConvolveLib.getW5Kernel());
+		proc7.convolve(ConvolveLib.KERNEL_LAB7_W5);
 		proc7.writeWorkingImage(outputFile1);
 	}
 	
