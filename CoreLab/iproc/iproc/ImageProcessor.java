@@ -1,11 +1,14 @@
-import javax.imageio.ImageIO;
+package iproc;
 
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
-
+import javax.imageio.ImageIO;
 
 public class ImageProcessor {
 	
@@ -21,7 +24,6 @@ public class ImageProcessor {
 	
 	/* private members */
 	protected BufferedImage workingImage_;
-	protected PixelManipulator workingPxm_;
 	protected int imageType_;
 
 	
@@ -34,7 +36,6 @@ public class ImageProcessor {
 	public ImageProcessor() {
 		workingImage_ = null;
 		imageType_ = -1;
-		workingPxm_ = null;
 	}
 	
 	
@@ -46,7 +47,6 @@ public class ImageProcessor {
 	public ImageProcessor(File imageFile) {
 		readWorkingImage(imageFile);
 		imageType_ = workingImage_.getType();
-		workingPxm_ = new PixelManipulator(workingImage_);
 	}
 	
 	/**
@@ -56,7 +56,6 @@ public class ImageProcessor {
 	 */
 	public ImageProcessor(BufferedImage image) {
 		setImage(image);
-		workingPxm_ = new PixelManipulator(workingImage_);
 	}
 	
 	
@@ -71,7 +70,7 @@ public class ImageProcessor {
 	 */	
 	public int readWorkingImage(File imageSource){
 		try {
-			workingImage_ = ImageIO.read(imageSource);
+			setImage(ImageIO.read(imageSource));
 			return 0;
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -135,6 +134,7 @@ public class ImageProcessor {
 	 */
 	public void setImage(BufferedImage image) {
 		workingImage_ = image;
+		imageType_ = workingImage_.getType();
 	}
 	
 	
@@ -146,18 +146,60 @@ public class ImageProcessor {
 		return new BufferedImage(workingImage_.getWidth(), 
 				workingImage_.getHeight(), workingImage_.getType());
 	}
+	
+	public BufferedImage deepCopy() {
+		 ColorModel cm = workingImage_.getColorModel();
+		 boolean isAlphaPremultiplied = workingImage_.isAlphaPremultiplied();
+		 WritableRaster raster = workingImage_.copyData(null);
+		 
+		 return new BufferedImage(cm, raster, isAlphaPremultiplied, null)
+		 	.getSubimage(0, 0, workingImage_.getWidth(),
+		 		workingImage_.getHeight());
+		}
+	
+	private class PixelIterator implements Iterator<Pixel> {
 
-	
-	/* private functions */
-	
-	/**
-	 * 
-	 */
-	private Iterator<RawPixel> pixelIterator() {
-		
-	}
-	
-	
-	/* public sub classes */
-	public class Itterator<RawPixel> 
+        private final BufferedImage image_;
+        private int x_;
+        private int y_;
+
+        PixelIterator(BufferedImage image) {
+        	image_ = image;
+        	x_ = 0;
+        	y_ = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return (y_ < image_.getHeight() &&
+            		x_ < image_.getWidth());
+        }
+
+        @Override
+        public Pixel next() {
+            if (! hasNext()) {
+            	throw new NoSuchElementException();
+            }
+            
+            Pixel pixel = new Pixel(image_, x_, y_);
+            
+            if (x_ < image_.getWidth() -1) {
+            	x_++;
+            } else {
+            	x_ = 0;
+            	y_++;
+            }
+            
+            return pixel;
+        }
+
+        @Override
+        public void remove() {
+            return;
+        }
+    }
+
+    public Iterator<Pixel> iterator() {
+        return new PixelIterator(workingImage_);
+    }
 }

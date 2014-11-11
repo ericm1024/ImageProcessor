@@ -1,3 +1,4 @@
+package labs;
 import java.io.File;
 
 public class labTwo {

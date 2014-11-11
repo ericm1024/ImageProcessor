@@ -1,3 +1,7 @@
+package labs;
+
+import iproc.ImageProcessor;
+
 import java.io.File;
 
 public class LabThree {

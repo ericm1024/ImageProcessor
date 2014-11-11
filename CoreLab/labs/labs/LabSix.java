@@ -1,3 +1,8 @@
+package labs;
+
+import iproc.HistogramProcessor;
+import iproc.ImageProcessor;
+
 import java.io.File;
 
 
@@ -7,16 +12,16 @@ public class LabSix {
 	
 	private static LabSixProcessor proc6 = new LabSixProcessor();
 	// for histogram functions
-	private static ColorHistogramProcessor procH = new ColorHistogramProcessor();
+	private static HistogramProcessor procH = new HistogramProcessor();
 	
 	public static void main(String args[]) {
-		/*
+
 		problemOne();
 		problemTwo();
 		problemThree();
 		problemFour();
 		problemFive();
-		*/
+
 		testOne();
 	}
 
@@ -27,7 +32,7 @@ public class LabSix {
 		procH.readWorkingImage(baseFile);
 		
 		procH.writeWorkingImage(outputFile1);
-		ImageProcessor.writeImage(procH.histogram(), outputFile2);
+		ImageProcessor.writeImage(procH.histogramRgb(), outputFile2);
 	}
 	
 	public static void problemTwo() {
@@ -39,7 +44,7 @@ public class LabSix {
 		proc6.writeWorkingImage(outputFile1);
 		
 		procH.readWorkingImage(outputFile1);
-		ImageProcessor.writeImage(procH.histogram(), outputFile2);
+		ImageProcessor.writeImage(procH.histogramRgb(), outputFile2);
 	}
 	
 	
@@ -52,7 +57,7 @@ public class LabSix {
 		proc6.writeWorkingImage(outputFile1);
 		
 		procH.readWorkingImage(outputFile1);
-		ImageProcessor.writeImage(procH.histogram(), outputFile2);
+		ImageProcessor.writeImage(procH.histogramRgb(), outputFile2);
 	}
 	
 	
@@ -65,7 +70,7 @@ public class LabSix {
 		proc6.writeWorkingImage(outputFile1);
 		
 		procH.readWorkingImage(outputFile1);
-		ImageProcessor.writeImage(procH.histogram(), outputFile2);
+		ImageProcessor.writeImage(procH.histogramRgb(), outputFile2);
 	}
 	
 	public static void problemFive() {
@@ -78,7 +83,7 @@ public class LabSix {
 		proc6.writeWorkingImage(outputFile1);
 		
 		procH.readWorkingImage(outputFile1);
-		ImageProcessor.writeImage(procH.histogram(), outputFile2);
+		ImageProcessor.writeImage(procH.histogramRgb(), outputFile2);
 	}
 	
 	public static void testOne() {
@@ -91,6 +96,6 @@ public class LabSix {
 		proc6.writeWorkingImage(outputFile1);
 		
 		procH.readWorkingImage(outputFile1);
-		ImageProcessor.writeImage(procH.histogram(), outputFile2);
+		ImageProcessor.writeImage(procH.histogramRgb(), outputFile2);
 	}
 }
