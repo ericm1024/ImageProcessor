@@ -1,9 +1,11 @@
 package labs;
 import iproc.ImageProcessor;
 import iproc.Pixel;
+import iproc.RawPixel;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Iterator;
 
 
 public class LabFourProcessor extends ImageProcessor {
@@ -50,17 +52,20 @@ public class LabFourProcessor extends ImageProcessor {
 	
 	private double[] getHistogram() {
 		double[] histogram = new double[NUM_COLORS];
-		int width = workingImage_.getWidth();
-		int height = workingImage_.getHeight();
-		double pixelWeight = 1.0/(width*height);
-		int localShade;
+		double pixelWeight = 1.0
+				/ (workingImage_.getWidth() * workingImage_.getHeight());
 		
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				localShade = Pixel.getGreyFromRGB(workingImage_.getRGB(x, y));
-				histogram[localShade] += pixelWeight;
-			}
+		Iterator<Pixel> pixItter = iterator();
+		while (pixItter.hasNext()) {
+			RawPixel next = pixItter.next().get();
+			int localShade = (next.getColorInt(RawPixel.ColorField.RED)
+							+ next.getColorInt(RawPixel.ColorField.GREEN)
+							+ next.getColorInt(RawPixel.ColorField.BLUE)
+							) / 3;
+
+			histogram[localShade] += pixelWeight;
 		}
+		
 		return histogram;
 	}
 	
@@ -80,20 +85,23 @@ public class LabFourProcessor extends ImageProcessor {
 	
 	
 	private BufferedImage mapLookup(double[] lookupTable) {
-		int width = workingImage_.getWidth();
-		int height = workingImage_.getHeight();
-		BufferedImage output = new BufferedImage(width, height, imageType_);
-		int localGrey;
-		int localRGB;
+		BufferedImage output = blankCopy();
 		
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				localGrey = Pixel.getGreyFromRGB(workingImage_.getRGB(x, y));
-				localRGB = Pixel.getRgbFromGrey((int)lookupTable[localGrey]);
-				output.setRGB(x, y, localRGB);
-			}
+		Iterator<Pixel> pixItter = iterator();
+		while(pixItter.hasNext()) {
+			Pixel pix = pixItter.next();
+			RawPixel rawPix = pix.get();
+			int localShade = (rawPix.getColorInt(RawPixel.ColorField.RED)
+							+ rawPix.getColorInt(RawPixel.ColorField.GREEN)
+							+ rawPix.getColorInt(RawPixel.ColorField.BLUE)
+							) / 3;
+			RawPixel result = new RawPixel();
+			result.setColorAll((int)lookupTable[localShade], 
+					(int)lookupTable[localShade], (int)lookupTable[localShade],
+					RawPixel.INT_COLOR_MAX);
+			pix.set(result);
 		}
 		
 		return output;
-	}	
+	}
 }

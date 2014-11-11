@@ -44,8 +44,6 @@ public class LabNine {
 		cproc.readWorkingImage(starter);
 		cproc.convolve(laplace2);
 		cproc.writeWorkingImage(out2);
-		
-		
 	}
 	
 	private static void  gauss(File starter, final String name) {
@@ -70,8 +68,8 @@ public class LabNine {
 	}
 	
 	private static void laplaceOfGauss(File starter, final String name) {
-		int width = 7;
-		double numSigma = 2.0;
+		int width = 11;
+		double numSigma = 4.0;
 		double sigma = ((double)width)/(2*numSigma);
 		
 		File out1 = new File(OUT_DIR+name+"-gauss-s="+sigma+"-laplace1.png");

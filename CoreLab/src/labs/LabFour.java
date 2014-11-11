@@ -29,8 +29,8 @@ public class LabFour {
 		procH.readWorkingImage(baseFile);
 		
 		proc4.writeWorkingImage(outputFile1);
-		ImageProcessor.writeImage(procH.histogram(), outputFile2);
-		ImageProcessor.writeImage(procH.cumulativeHistogram(), outputFile3);
+		ImageProcessor.writeImage(procH.histogramRgb(), outputFile2);
+		ImageProcessor.writeImage(procH.cumulativeHistogramRgb(), outputFile3);
 	}
 	
 		
@@ -42,7 +42,7 @@ public class LabFour {
 		proc4.readWorkingImage(baseFile);
 		ImageProcessor.writeImage(proc4.equalize(), outputFile1);	
 		procH.readWorkingImage(outputFile1);
-		ImageProcessor.writeImage(procH.histogram(), outputFile2);
-		ImageProcessor.writeImage(procH.cumulativeHistogram(), outputFile3);
+		ImageProcessor.writeImage(procH.histogramRgb(), outputFile2);
+		ImageProcessor.writeImage(procH.cumulativeHistogramRgb(), outputFile3);
 	}
 }

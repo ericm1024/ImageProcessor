@@ -84,6 +84,7 @@ public class LabTwoProcessor extends ImageProcessor {
 			
 			/* incoming ternary operators */
 			
+			// TODO: fix this
 			a = a.inImage((int)sourceX, (int)sourceY)
 					? a.moveTo((int)sourceX, (int)sourceY)
 					/* if it's out of bounds, we want a blank pixel */

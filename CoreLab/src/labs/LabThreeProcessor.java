@@ -1,9 +1,12 @@
 package labs;
-import ImageProcessor;
+
+import iproc.ImageProcessor;
 import iproc.Pixel;
+import iproc.RawPixel;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Iterator;
 
 
 public class LabThreeProcessor extends ImageProcessor {
@@ -118,13 +121,10 @@ public class LabThreeProcessor extends ImageProcessor {
 	 * Makes the working image greyscale.
 	 */
 	public void makeGreyscale() {	
-		int newRGB;
-		for (int x=0; x<workingImage_.getWidth(); x++) {
-			for (int y=0; y<workingImage_.getHeight(); y++) {
-				newRGB = Pixel.greyscale(workingImage_.getRGB(x,y));
-				workingImage_.setRGB(x,y,newRGB);
-			}
-		}	
+		Iterator<Pixel> pixIter = iterator();
+		while (pixIter.hasNext()) {
+			pixIter.next().greyscale();
+		}
 	}
 	
 	
@@ -137,15 +137,13 @@ public class LabThreeProcessor extends ImageProcessor {
 	 */
 	private int[] countColorsGreyscale() {
 		int[] colorCounts = new int[NUM_COLORS];
-		int localGreyValue;
 		
-		for (int x=0; x<workingImage_.getWidth(); x++) {
-			for (int y=0; y<workingImage_.getHeight(); y++) {
-				localGreyValue =
-						Pixel.getGreyFromRGB(workingImage_.getRGB(x, y) );
-				colorCounts[localGreyValue]++;
-			}
+		Iterator<Pixel> pixIter = iterator();
+		while (pixIter.hasNext()) {
+			int greyValue = pixIter.next().getGrey();
+			colorCounts[greyValue]++;
 		}
+		
 		return colorCounts;
 	}
 	
@@ -159,7 +157,6 @@ public class LabThreeProcessor extends ImageProcessor {
 			colorCounts[i] = (int)((double)colorCounts[i]*weight);
 		}
 	}
-	
 	
 	/**
 	 * @param colorCounts
@@ -177,27 +174,14 @@ public class LabThreeProcessor extends ImageProcessor {
 			
 			for (int y = 0; y < histogram.getHeight(); y++) {
 				if ((histogram.getHeight() - localHistHeight) <= y) {
-					localPixel = new Pixel(histogram.getRGB(x,y));
-					makeGreyShade(localPixel, Pixel.MAX_COLOR);
-					histogram.setRGB(x, y, localPixel.getRGB());
+					localPixel = new Pixel(histogram, x, y);
+					localPixel.setGrey(RawPixel.INT_COLOR_MAX);;
 				}
 			}
 		}
-		
+				
 		return histogram;
 	}
-	
-	
-	/**
-	 * takes a pixel and makes all color values the same.
-	 * @param p
-	 */
-	private void makeGreyShade(Pixel p, int color){
-		p.setRed(color);
-		p.setGreen(color);
-		p.setBlue(color);
-	}
-	
 	
 	/**
 	 * @param array an array of integers
@@ -212,7 +196,6 @@ public class LabThreeProcessor extends ImageProcessor {
 		}
 		return max;
 	}
-
 	
 	/**
 	 * @param array
@@ -226,7 +209,6 @@ public class LabThreeProcessor extends ImageProcessor {
 		}
 		return index;
 	}
-
 	
 	/**
 	 * @param array
@@ -315,8 +297,6 @@ public class LabThreeProcessor extends ImageProcessor {
 		return index;
 	}
 	
-	
-	
 	/**
 	 * @param colorCounts: int[] where each element is the number of
 	 * occurrences of the color value of its index
@@ -341,18 +321,14 @@ public class LabThreeProcessor extends ImageProcessor {
 		return index;
 	}
 	
-	
 	private BufferedImage stretchImageMinMax(int min, int max) {
-		BufferedImage stretched = new BufferedImage(workingImage_.getWidth(),
-				                        workingImage_.getHeight(), imageType_);
-		Pixel localPixel;
-		
-		for (int x = 0; x < workingImage_.getWidth(); x++) {
-			for (int y = 0; y < workingImage_.getHeight(); y++) {
-				localPixel = new Pixel(workingImage_.getRGB(x,y));
-				makeGreyShade(localPixel, transform(localPixel.getRed(), min, max));
-				stretched.setRGB(x, y, localPixel.getRGB());
-			}
+		BufferedImage stretched = blankCopy();
+		ImageProcessor proc = new ImageProcessor(stretched);
+
+		Iterator<Pixel> iter = proc.iterator();		
+		while (iter.hasNext()) {
+			Pixel localPixel = iter.next();
+			localPixel.setGrey(transform(localPixel.getRed(), min, max));
 		}
 		return stretched;
 	}
