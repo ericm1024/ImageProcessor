@@ -6,6 +6,7 @@ import java.util.Iterator;
 
 import iproc.ImageProcessor;
 import iproc.Pixel;
+import iproc.RawPixel;
 
 public class LabTwoProcessor extends ImageProcessor {
 	
@@ -83,12 +84,11 @@ public class LabTwoProcessor extends ImageProcessor {
 							/ (double)(output.getHeight() - 1);
 			
 			/* incoming ternary operators */
-			
-			// TODO: fix this
 			a = a.inImage((int)sourceX, (int)sourceY)
 					? a.moveTo((int)sourceX, (int)sourceY)
-					/* if it's out of bounds, we want a blank pixel */
-				    : new Pixel(workingImage_);
+					/* if it's out of bounds, we want a blank pixel
+					 * (no we don't, see todo) */
+				    : new Pixel(workingImage_); // TODO: fix this.
 					
 			b = b.inImage((int)sourceX + 1, (int)sourceY)
 					? b.moveTo((int)sourceX + 1, (int)sourceY)
@@ -111,11 +111,13 @@ public class LabTwoProcessor extends ImageProcessor {
 			c.set(c.get().multiply(v - u*v));
 			d.set(d.get().multiply(u*v));
 			
+			RawPixel sum = a.get().add(b.get().add(c.get().add(d.get())));	
+			
 			/* 
 			 * set the corresponding pixel in the output to the sum of all the contributing
 			 * components from the original image
 			 */
-			output.setRGB(destX, destY, a.add(b).add(c).add(d).getRGB());
+			output.setRGB(destX, destY, sum.getColorRgb());
 		}
 		workingImage_ = output;
 	}
@@ -125,70 +127,68 @@ public class LabTwoProcessor extends ImageProcessor {
 	 * @param output the BufferedImage to write output to.
 	 */
 	private void rotateWorkingTo(BufferedImage output, double theta) {
+		ImageProcessor proc = new ImageProcessor(output);
+		
 		/* the four pixels we will work with for each interpolation*/
-		Pixel a, b, c, d;
-		
-		/* where our new pixel should come from in the source */
-		double sourceX;
-		double sourceY;
-		
-		/* these correspond to u and v, respectively from the equations we were given */
-		double u;
-		double v;
+		Pixel a = new Pixel(workingImage_);
+		Pixel b = new Pixel(workingImage_);
+		Pixel c = new Pixel(workingImage_);
+		Pixel d = new Pixel(workingImage_);
 		
 		/* the center of the image */
-		final int xCenter = workingImage_.getWidth()/2;
-		final int yCenter = workingImage_.getHeight()/2;
+		int xCenter = workingImage_.getWidth()/2;
+		int yCenter = workingImage_.getHeight()/2;
 		
-		for (int destX = 0; destX < output.getWidth(); destX++) {
-			for (int destY = 0; destY < output.getHeight(); destY++) {
+		Iterator<Pixel> pixelItter = proc.iterator();
+		while (pixelItter.hasNext()) {
+			Pixel localPixel = pixelItter.next();
+			
+			int destX = localPixel.getX();
+			int destY = localPixel.getY();
 				
-				/* find where our source X and Y are (algorithm given in assignment) */
-				sourceX = ( Math.cos(theta)*(destX - xCenter) +
-						    Math.sin(theta)*(destY - yCenter) + xCenter); 
-				sourceY = (-Math.sin(theta)*(destX - xCenter) + 
-						    Math.cos(theta)*(destY - yCenter) + yCenter); 
-				
-				/* find the remainders */
-				u = sourceX % 1;
-				v = sourceY % 1;
-				
-				/* reset all of working pixels. The array indicies are given in the assignment */
-				try {
-					a = new Pixel(workingImage_.getRGB((int)sourceX, (int)sourceY));
-				} catch (ArrayIndexOutOfBoundsException e) {
-					a = new Pixel();
-				}
-				try {
-					b = new Pixel(workingImage_.getRGB((int)sourceX+1, (int)sourceY));
-				} catch (ArrayIndexOutOfBoundsException e) {
-					b = new Pixel();
-				}
-				try {
-					c = new Pixel(workingImage_.getRGB((int)sourceX, (int)sourceY+1));
-				} catch (ArrayIndexOutOfBoundsException e) {
-					c = new Pixel();
-				}
-				try {
-					d = new Pixel(workingImage_.getRGB((int)sourceX+1, (int)sourceY+1));
-				} catch (ArrayIndexOutOfBoundsException e) {
-					d = new Pixel();
-				}		
-				
-				/* scale the pixels based on the algorithm we were given */
-				a.scale(1 - v - u - u*v);
-				b.scale(u - u*v);
-				c.scale(v - u*v);
-				d.scale(u*v);
-				
-				/* 
-				 * set the corresponding pixel in the output to the sum of all the contributing
-				 * components from the original image
-				 */
-				output.setRGB(destX, destY, a.add(b).add(c).add(d).getRGB());
-			}
+			/* find where our source X and Y are (algorithm given in assignment) */
+			double sourceX = ( Math.cos(theta)*(destX - xCenter) +
+					    Math.sin(theta)*(destY - yCenter) + xCenter); 
+			double sourceY = (-Math.sin(theta)*(destX - xCenter) + 
+					    Math.cos(theta)*(destY - yCenter) + yCenter); 
+			
+			/* find the remainders */
+			double u = sourceX % 1;
+			double v = sourceY % 1;
+			
+			/* incoming ternary operators */
+			a = a.inImage((int)sourceX, (int)sourceY)
+					? a.moveTo((int)sourceX, (int)sourceY)
+					/* if it's out of bounds, we want a blank pixel
+					 * (no we don't, see todo) */
+				    : new Pixel(workingImage_); // TODO: fix this.
+					
+			b = b.inImage((int)sourceX + 1, (int)sourceY)
+					? b.moveTo((int)sourceX + 1, (int)sourceY)
+					: new Pixel(workingImage_);
+					
+			c = c.inImage((int)sourceX, (int)sourceY + 1)
+					? c.moveTo((int)sourceX, (int)sourceY + 1)
+					: new Pixel(workingImage_);
+			
+			d = d.inImage((int)sourceX + 1, (int)sourceY + 1)
+					? d.moveTo((int)sourceX + 1, (int)sourceY + 1)
+					: new Pixel(workingImage_);
+			
+			/* scale the pixels based on the algorithm we were given */
+			a.set(a.get().multiply(1 - v - u - u*v));
+			b.set(b.get().multiply(u - u*v));
+			c.set(c.get().multiply(v - u*v));
+			d.set(d.get().multiply(u*v));
+			
+			RawPixel sum = a.get().add(b.get().add(c.get().add(d.get())));
+			
+			/* 
+			 * set the corresponding pixel in the output to the sum of all the contributing
+			 * components from the original image
+			 */
+			output.setRGB(destX, destY, sum.getColorRgb());
 		}
 		workingImage_ = output;
-	}
-	
+	}	
 }

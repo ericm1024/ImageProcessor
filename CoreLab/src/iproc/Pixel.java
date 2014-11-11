@@ -55,7 +55,7 @@ public class Pixel {
 	}
 	
 	public RawPixel get() {
-		return pixel_;
+		return new RawPixel(pixel_);
 	}
 	
 	public Pixel moveTo(int x, int y) {
@@ -70,6 +70,53 @@ public class Pixel {
 	public Boolean inImage(int x, int y) {
 		return (x >= 0 && x < parent_.getWidth() &&
 				y >= 0 && y < parent_.getHeight());
+	}
+	
+	public int getRed() {
+		return pixel_.getColorInt(RawPixel.ColorField.RED);
+	}
+	
+	public int getGreen() {
+		return pixel_.getColorInt(RawPixel.ColorField.GREEN);
+	}
+	
+	public int getBlue() {
+		return pixel_.getColorInt(RawPixel.ColorField.BLUE);
+	}
+	
+	public int getGrey() {
+		return (pixel_.getColorInt(RawPixel.ColorField.RED)
+				+ pixel_.getColorInt(RawPixel.ColorField.GREEN)
+				+ pixel_.getColorInt(RawPixel.ColorField.BLUE)
+				/3);
+	}
+	
+	public void greyscale() {
+		int grey = getGrey();
+		pixel_.setColorAll(grey, grey, grey, 
+				pixel_.getColorInt(RawPixel.ColorField.ALPHA));
+		updateImage();
+	}
+	
+	public void setRed(int red) {
+		pixel_.setColor(RawPixel.ColorField.RED, red);
+		updateImage();
+	}
+	
+	public void setGreen(int green) {
+		pixel_.setColor(RawPixel.ColorField.RED, green);
+		updateImage();
+	}
+	
+	public void setBlue(int blue) {
+		pixel_.setColor(RawPixel.ColorField.RED, blue);
+		updateImage();
+	}
+	
+	public void setGrey(int grey) {
+		pixel_.setColorAll(grey, grey, grey,
+			pixel_.getColorInt(RawPixel.ColorField.ALPHA));
+		updateImage();
 	}
 	
 	/* private methods */

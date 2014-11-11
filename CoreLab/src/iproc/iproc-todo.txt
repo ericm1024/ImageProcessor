@@ -1,7 +1,7 @@
 * change all double[][]s to float[][]s
 	performance. double precision is not necessary when we're working
 	with 8 bit color. (i.e. 32 bits of entropy is completely sufficient
-	for storing what amounts to 8 bits of entropy)
+	for storing what amounts to 8 to 10 bits of entropy)
 
 * create a kernel class, make kernels matrices
 	methods:
@@ -19,3 +19,5 @@
 		ones that boundary check and ones that do not.
 
 * implement matrix multiplication
+
+* fix convolution edge behavior (how ?)
