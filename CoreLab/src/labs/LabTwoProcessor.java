@@ -28,7 +28,6 @@ public class LabTwoProcessor extends ImageProcessor {
 		super(imageFile);
 	}
 	
-	
 	/**
 	 * Basic constructor for an ImageProcessor from a file
 	 * 
