@@ -1,4 +1,5 @@
 package labs;
+
 import iproc.ImageProcessor;
 import iproc.Pixel;
 import iproc.RawPixel;
