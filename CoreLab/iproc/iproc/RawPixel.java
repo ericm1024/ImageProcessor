@@ -8,13 +8,13 @@ public class RawPixel {
 	
 	/* public members */
 	
-	public static final double DOUBLE_COLOR_MIN = 0.0;
-	public static final double DOUBLE_COLOR_MAX = 1.0;
+	public static final float FLOAT_COLOR_MIN = 0;
+	public static final float FLOAT_COLOR_MAX = 1;
 	
 	public static final int INT_COLOR_MIN = 0;
 	public static final int INT_COLOR_MAX = 255;
 	
-	public static enum Mode {DOUBLE, INT};
+	public static enum Mode {FLOAT, INT};
 	public static enum ColorField {RED, GREEN, BLUE, ALPHA};
 	
 	/* private members */
@@ -41,18 +41,18 @@ public class RawPixel {
 	
 	/**
 	 * standard RawPixel constructor
-	 * @param mode: the numerical mode to operate under (double or integer).
-	 * Under double mode, the colors range from DOUBLE_COLOR_MIN to
-	 * DOUBLE_COLOR_MAX. Similarly with integer mode and corresponding
+	 * @param mode: the numerical mode to operate under (float or integer).
+	 * Under float mode, the colors range from FLOAT_COLOR_MIN to
+	 * FLOAT_COLOR_MAX. Similarly with integer mode and corresponding
 	 * constants.
 	 */
 	public RawPixel(Mode mode) {
 		mode_ = mode;
-		if (mode == Mode.DOUBLE) {
-			red_ = (double)DOUBLE_COLOR_MIN;
-			green_ = (double)DOUBLE_COLOR_MIN;
-			blue_ = (double)DOUBLE_COLOR_MIN;
-			alpha_ = (double)DOUBLE_COLOR_MIN;
+		if (mode == Mode.FLOAT) {
+			red_ = (float)FLOAT_COLOR_MIN;
+			green_ = (float)FLOAT_COLOR_MIN;
+			blue_ = (float)FLOAT_COLOR_MIN;
+			alpha_ = (float)FLOAT_COLOR_MIN;
 		} else if (mode == Mode.INT) {
 			red_ = (int)INT_COLOR_MIN;
 			green_ = (int)INT_COLOR_MIN;
@@ -70,11 +70,11 @@ public class RawPixel {
 	}
 	
 	/**
-	 * Set one of the color fields of the pixel with a double
+	 * Set one of the color fields of the pixel with a float
 	 */
-	public void setColor(ColorField color, double value) {
+	public void setColor(ColorField color, float value) {
 		Mode oldMode = mode_;
-		assertMode(Mode.DOUBLE);
+		assertMode(Mode.FLOAT);
 
 		switch (color) {
 			case RED:
@@ -91,7 +91,7 @@ public class RawPixel {
 				break;
 			default:
 				System.err.println(
-						"RawPixel.setColor (double): got unknown color.");
+						"RawPixel.setColor (float): got unknown color.");
 		}
 		assertMode(oldMode);
 	}
@@ -123,8 +123,8 @@ public class RawPixel {
 		assertMode(oldMode);
 	}
 	
-	public void setColorAll(double red, double green, 
-			double blue, double alpha) {
+	public void setColorAll(float red, float green, 
+			float blue, float alpha) {
 		setColor(ColorField.RED, red);
 		setColor(ColorField.GREEN, green);
 		setColor(ColorField.BLUE, blue);
@@ -195,30 +195,30 @@ public class RawPixel {
 	}
 	
 	/**
-	 * Get one of the color fields as a double
+	 * Get one of the color fields as a float
 	 */
-	public double getColorDouble(ColorField color) {
+	public float getColorFloat(ColorField color) {
 		Mode oldMode = mode_;
-		assertMode(Mode.DOUBLE);
+		assertMode(Mode.FLOAT);
 		
-		double value;
+		float value;
 		switch (color) {
 			case RED:
-				value = red_.doubleValue();
+				value = red_.floatValue();
 				break;
 			case GREEN:
-				value = green_.doubleValue();
+				value = green_.floatValue();
 				break;
 			case BLUE:
-				value = blue_.doubleValue();
+				value = blue_.floatValue();
 				break;
 			case ALPHA:
-				value = alpha_.doubleValue();
+				value = alpha_.floatValue();
 				break;
 			default:
 				System.err.println(
-						"RawPixel.getColorDouble: got unknown color.");
-				value = DOUBLE_COLOR_MIN;
+						"RawPixel.getColorFloat: got unknown color.");
+				value = FLOAT_COLOR_MIN;
 		}
 		
 		assertMode(oldMode);
@@ -231,22 +231,22 @@ public class RawPixel {
 	 * @param x : the amount to add
 	 * @return this
 	 */
-	public RawPixel add(ColorField color, double x) {
+	public RawPixel add(ColorField color, float x) {
 		Mode oldMode = mode_;
-		assertMode(Mode.DOUBLE);
+		assertMode(Mode.FLOAT);
 		
 		switch (color) {
 			case RED:
-				setColor(ColorField.RED, red_.doubleValue() + x);
+				setColor(ColorField.RED, red_.floatValue() + x);
 				break;
 			case GREEN:
-				setColor(ColorField.GREEN, green_.doubleValue() + x);
+				setColor(ColorField.GREEN, green_.floatValue() + x);
 				break;
 			case BLUE:
-				setColor(ColorField.BLUE, blue_.doubleValue() + x);
+				setColor(ColorField.BLUE, blue_.floatValue() + x);
 				break;
 			case ALPHA:
-				setColor(ColorField.ALPHA, alpha_.doubleValue() + x);
+				setColor(ColorField.ALPHA, alpha_.floatValue() + x);
 				break;
 			default:
 				System.err.println("RawPixel.add: got unknown color.");
@@ -261,14 +261,14 @@ public class RawPixel {
 	 * @param x : the amount to add
 	 * @return this
 	 */
-	public RawPixel add(double x) {
+	public RawPixel add(float x) {
 		Mode oldMode = mode_;
-		assertMode(Mode.DOUBLE);
+		assertMode(Mode.FLOAT);
 		
-		setColor(ColorField.RED, red_.doubleValue() + x);
-		setColor(ColorField.GREEN, green_.doubleValue() + x);
-		setColor(ColorField.BLUE, blue_.doubleValue() + x);
-		setColor(ColorField.ALPHA, alpha_.doubleValue() + x);
+		setColor(ColorField.RED, red_.floatValue() + x);
+		setColor(ColorField.GREEN, green_.floatValue() + x);
+		setColor(ColorField.BLUE, blue_.floatValue() + x);
+		setColor(ColorField.ALPHA, alpha_.floatValue() + x);
 
 		assertMode(oldMode);
 		return this;
@@ -283,10 +283,10 @@ public class RawPixel {
 		Mode oldMode = rhs.mode_;
 		rhs.assertMode(this.mode_);
 		
-		add(ColorField.RED, rhs.getColorDouble(ColorField.RED));
-		add(ColorField.GREEN, rhs.getColorDouble(ColorField.GREEN));
-		add(ColorField.BLUE, rhs.getColorDouble(ColorField.BLUE));
-		add(ColorField.ALPHA, rhs.getColorDouble(ColorField.ALPHA));
+		add(ColorField.RED, rhs.getColorFloat(ColorField.RED));
+		add(ColorField.GREEN, rhs.getColorFloat(ColorField.GREEN));
+		add(ColorField.BLUE, rhs.getColorFloat(ColorField.BLUE));
+		add(ColorField.ALPHA, rhs.getColorFloat(ColorField.ALPHA));
 		
 		rhs.assertMode(oldMode);
 		return this;
@@ -298,11 +298,11 @@ public class RawPixel {
 	 * @param x : the amount to subtract
 	 * @return this
 	 */
-	public RawPixel subtract(ColorField color, double x) {
+	public RawPixel subtract(ColorField color, float x) {
 		return add(color, -x);
 	}
 	
-	public RawPixel subtract(double x) {
+	public RawPixel subtract(float x) {
 		return add(-x);
 	}
 	
@@ -310,31 +310,31 @@ public class RawPixel {
 		Mode oldMode = rhs.mode_;
 		rhs.assertMode(this.mode_);
 		
-		subtract(ColorField.RED, rhs.getColorDouble(ColorField.RED));
-		subtract(ColorField.GREEN, rhs.getColorDouble(ColorField.GREEN));
-		subtract(ColorField.BLUE, rhs.getColorDouble(ColorField.BLUE));
-		subtract(ColorField.ALPHA, rhs.getColorDouble(ColorField.ALPHA));
+		subtract(ColorField.RED, rhs.getColorFloat(ColorField.RED));
+		subtract(ColorField.GREEN, rhs.getColorFloat(ColorField.GREEN));
+		subtract(ColorField.BLUE, rhs.getColorFloat(ColorField.BLUE));
+		subtract(ColorField.ALPHA, rhs.getColorFloat(ColorField.ALPHA));
 		
 		rhs.assertMode(oldMode);
 		return this;
 	}
 	
-	public RawPixel multiply(ColorField color, double x) {
+	public RawPixel multiply(ColorField color, float x) {
 		Mode oldMode = mode_;
-		assertMode(Mode.DOUBLE);
+		assertMode(Mode.FLOAT);
 		
 		switch (color) {
 			case RED:
-				setColor(ColorField.RED, red_.doubleValue() * x);
+				setColor(ColorField.RED, red_.floatValue() * x);
 				break;
 			case GREEN:
-				setColor(ColorField.GREEN, green_.doubleValue() * x);
+				setColor(ColorField.GREEN, green_.floatValue() * x);
 				break;
 			case BLUE:
-				setColor(ColorField.BLUE, blue_.doubleValue() * x);
+				setColor(ColorField.BLUE, blue_.floatValue() * x);
 				break;
 			case ALPHA:
-				setColor(ColorField.ALPHA, alpha_.doubleValue() * x);
+				setColor(ColorField.ALPHA, alpha_.floatValue() * x);
 				break;
 			default:
 				System.err.println("RawPixel.multiply: got unknown color.");
@@ -344,35 +344,35 @@ public class RawPixel {
 		return this;
 	}
 	
-	public RawPixel multiply(double x) {
+	public RawPixel multiply(float x) {
 		Mode oldMode = mode_;
-		assertMode(Mode.DOUBLE);
+		assertMode(Mode.FLOAT);
 		
-		setColor(ColorField.RED, red_.doubleValue() * x);
-		setColor(ColorField.GREEN, green_.doubleValue() * x);
-		setColor(ColorField.BLUE, blue_.doubleValue() * x);
-		setColor(ColorField.ALPHA, alpha_.doubleValue() * x);
+		setColor(ColorField.RED, red_.floatValue() * x);
+		setColor(ColorField.GREEN, green_.floatValue() * x);
+		setColor(ColorField.BLUE, blue_.floatValue() * x);
+		setColor(ColorField.ALPHA, alpha_.floatValue() * x);
 		
 		assertMode(oldMode);
 		return this;
 	}
 	
-	public RawPixel divide(ColorField color, double x) {
+	public RawPixel divide(ColorField color, float x) {
 		Mode oldMode = mode_;
-		assertMode(Mode.DOUBLE);
+		assertMode(Mode.FLOAT);
 		
 		switch (color) {
 			case RED:
-				setColor(ColorField.RED, red_.doubleValue() / x);
+				setColor(ColorField.RED, red_.floatValue() / x);
 				break;
 			case GREEN:
-				setColor(ColorField.GREEN, green_.doubleValue() / x);
+				setColor(ColorField.GREEN, green_.floatValue() / x);
 				break;
 			case BLUE:
-				setColor(ColorField.BLUE, blue_.doubleValue() / x);
+				setColor(ColorField.BLUE, blue_.floatValue() / x);
 				break;
 			case ALPHA:
-				setColor(ColorField.ALPHA, alpha_.doubleValue() / x);
+				setColor(ColorField.ALPHA, alpha_.floatValue() / x);
 				break;
 			default:
 				System.err.println("RawPixel.divide: got unknown color.");
@@ -382,14 +382,14 @@ public class RawPixel {
 		return this;
 	}
 	
-	public RawPixel divide(double x) {
+	public RawPixel divide(float x) {
 		Mode oldMode = mode_;
-		assertMode(Mode.DOUBLE);
+		assertMode(Mode.FLOAT);
 		
-		setColor(ColorField.RED, red_.doubleValue() / x);
-		setColor(ColorField.GREEN, green_.doubleValue() / x);
-		setColor(ColorField.BLUE, blue_.doubleValue() / x);
-		setColor(ColorField.ALPHA, alpha_.doubleValue() / x);
+		setColor(ColorField.RED, red_.floatValue() / x);
+		setColor(ColorField.GREEN, green_.floatValue() / x);
+		setColor(ColorField.BLUE, blue_.floatValue() / x);
+		setColor(ColorField.ALPHA, alpha_.floatValue() / x);
 		
 		assertMode(oldMode);
 		return this;
@@ -398,7 +398,7 @@ public class RawPixel {
 	/* private functions */
 	
 	/**
-	 * This is the workhorse of this class. Changes between integer and double
+	 * This is the workhorse of this class. Changes between integer and float
 	 * modes. 
 	 * @param mode: The numerical mode to operate under. See the constructor
 	 * for more details.
@@ -407,28 +407,28 @@ public class RawPixel {
 		if (mode_ == mode) {
 			return;
 		}
-		if (mode_ == Mode.DOUBLE && mode == Mode.INT) {
-			red_ = (int)(red_.doubleValue() * INT_COLOR_MAX);
-			green_ = (int)(green_.doubleValue() * INT_COLOR_MAX);
-			blue_ = (int)(blue_.doubleValue() * INT_COLOR_MAX);
-			alpha_ = (int)(alpha_.doubleValue() * INT_COLOR_MAX);
+		if (mode_ == Mode.FLOAT && mode == Mode.INT) {
+			red_ = (int)(red_.floatValue() * INT_COLOR_MAX);
+			green_ = (int)(green_.floatValue() * INT_COLOR_MAX);
+			blue_ = (int)(blue_.floatValue() * INT_COLOR_MAX);
+			alpha_ = (int)(alpha_.floatValue() * INT_COLOR_MAX);
 			mode_ = mode;
-		} else if (mode_ == Mode.INT && mode == Mode.DOUBLE) {
-			red_ = red_.doubleValue() / (double)INT_COLOR_MAX;
-			green_ = green_.doubleValue() / (double)INT_COLOR_MAX;
-			blue_ = blue_.doubleValue() / (double)INT_COLOR_MAX;
-			alpha_ = alpha_.doubleValue() / (double)INT_COLOR_MAX;
+		} else if (mode_ == Mode.INT && mode == Mode.FLOAT) {
+			red_ = red_.floatValue() / (float)INT_COLOR_MAX;
+			green_ = green_.floatValue() / (float)INT_COLOR_MAX;
+			blue_ = blue_.floatValue() / (float)INT_COLOR_MAX;
+			alpha_ = alpha_.floatValue() / (float)INT_COLOR_MAX;
 			mode_ = mode;
 		} else {
 			System.err.println("RawPixel.assertMode: got unknown mode.");
 		}
 	}
 	
-	private static double validate(double color) {
-		if (color < DOUBLE_COLOR_MIN) {
-			return DOUBLE_COLOR_MIN;
-		} else if (color > DOUBLE_COLOR_MAX) {
-			return DOUBLE_COLOR_MAX;
+	private static float validate(float color) {
+		if (color < FLOAT_COLOR_MIN) {
+			return FLOAT_COLOR_MIN;
+		} else if (color > FLOAT_COLOR_MAX) {
+			return FLOAT_COLOR_MAX;
 		} else {
 			return color;
 		}

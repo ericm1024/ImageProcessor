@@ -39,7 +39,7 @@ public class LabSix {
 		File outputFile2 = new File(WORK_DIR+"rotated-hue-histogram.png");
 		
 		proc6.readWorkingImage(baseFile);
-		proc6.rotateHue(Math.PI/2);
+		proc6.rotateHue((float)Math.PI/2f);
 		proc6.writeWorkingImage(outputFile1);
 		
 		procH.readWorkingImage(outputFile1);
@@ -65,7 +65,7 @@ public class LabSix {
 		File outputFile2 = new File(WORK_DIR+"increased-saturation-histogram.png");
 		
 		proc6.readWorkingImage(baseFile);
-		proc6.increaseSaturation(0.1);
+		proc6.increaseSaturation(0.1f);
 		proc6.writeWorkingImage(outputFile1);
 		
 		procH.readWorkingImage(outputFile1);
@@ -78,7 +78,7 @@ public class LabSix {
 		
 		proc6.readWorkingImage(baseFile);
 		proc6.stretchIntensity();
-		proc6.increaseSaturation(-0.1);
+		proc6.increaseSaturation(-0.1f);
 		proc6.writeWorkingImage(outputFile1);
 		
 		procH.readWorkingImage(outputFile1);
@@ -90,8 +90,8 @@ public class LabSix {
 		File outputFile2 = new File(WORK_DIR+"rotate-and-back-histogram.png");
 		
 		proc6.readWorkingImage(baseFile);
-		proc6.rotateHue(Math.PI/6);
-		proc6.rotateHue(-Math.PI/6);
+		proc6.rotateHue((float)Math.PI/6f);
+		proc6.rotateHue(-(float)Math.PI/6f);
 		proc6.writeWorkingImage(outputFile1);
 		
 		procH.readWorkingImage(outputFile1);

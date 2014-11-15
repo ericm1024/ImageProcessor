@@ -22,8 +22,8 @@ public class ImageProcessor {
 	public static final int NUM_COLORS = 256;
 	
 	/* protected members */
-	protected static final double TAU = 2*Math.PI;
-	protected static final double PI = Math.PI;
+	protected static final float TAU = (float)(2*Math.PI);
+	protected static final float PI = (float)Math.PI;
 	
 	/* private members */
 	protected BufferedImage workingImage_;
@@ -208,7 +208,7 @@ public class ImageProcessor {
     
     /* convolution ops */
     
-    public void convolve(double[][] kernel) {
+    public void convolve(float[][] kernel) {
 		BufferedImage result = blankCopy();
 
 		Iterator<Pixel> itter = iterator();
@@ -242,9 +242,9 @@ public class ImageProcessor {
 	 * @return returns an array with the same dimensions as source containing 
 	 *         the data in source convolved with the specified kernel
 	 */
-	public static double[][] convolveArrayPrimative(final double[][] kernel,
-			final double[][] source) {
-		double[][] result = new double[source.length][source[0].length];
+	public static float[][] convolveArrayPrimative(final float[][] kernel,
+			final float[][] source) {
+		float[][] result = new float[source.length][source[0].length];
 		
 		for (int x = 0; x < result.length; x++) {
 			for (int y = 0; y < result[0].length; y++) {
@@ -255,17 +255,17 @@ public class ImageProcessor {
 		return result;
 	}
 	
-	public void gradient(double[][] xKernel, double[][] yKernel) {
-		double[][] greyscale = getGreyscale();
-		double[][] magnitude = new double[greyscale.length][greyscale[0].length];
+	public void gradient(float[][] xKernel, float[][] yKernel) {
+		float[][] greyscale = getGreyscale();
+		float[][] magnitude = new float[greyscale.length][greyscale[0].length];
 	
 		for (int x = 0; x < magnitude.length; x++) {
 			for (int y = 0; y < magnitude[0].length; y++) {
-				double xmag = convolveOncePrimative(x, y, xKernel, greyscale);
+				float xmag = convolveOncePrimative(x, y, xKernel, greyscale);
 				
-				double ymag = convolveOncePrimative(x, y, yKernel, greyscale);
+				float ymag = convolveOncePrimative(x, y, yKernel, greyscale);
 				
-				magnitude[x][y] = Math.sqrt(xmag*xmag + ymag*ymag);
+				magnitude[x][y] = (float)Math.sqrt(xmag*xmag + ymag*ymag);
 			}
 		}
 		setFromGreyscale(magnitude);
@@ -273,11 +273,11 @@ public class ImageProcessor {
 		
 	/* convolution helpers */
 		
-	private void convolveOnce(double[][] kernel, Pixel outputPixel) {
-		double weight = 0.0;
-		double redSum = 0.0;
-		double greenSum = 0.0;
-		double blueSum = 0.0;
+	private void convolveOnce(float[][] kernel, Pixel outputPixel) {
+		float weight = 0;
+		float redSum = 0;
+		float greenSum = 0;
+		float blueSum = 0;
 		
 		Pixel workingPixel = new Pixel(workingImage_, outputPixel.getX(),
 											outputPixel.getY());
@@ -296,12 +296,12 @@ public class ImageProcessor {
 				
 				RawPixel pixel = workingPixel.get();
 				
-				redSum += weight * pixel.getColorDouble(ColorField.RED);
-				greenSum += weight * pixel.getColorDouble(ColorField.GREEN);
-				blueSum += weight * pixel.getColorDouble(ColorField.BLUE);
+				redSum += weight * pixel.getColorFloat(ColorField.RED);
+				greenSum += weight * pixel.getColorFloat(ColorField.GREEN);
+				blueSum += weight * pixel.getColorFloat(ColorField.BLUE);
 			}
 		}
-		RawPixel output = new RawPixel(RawPixel.Mode.DOUBLE);
+		RawPixel output = new RawPixel(RawPixel.Mode.FLOAT);
 		
 		output.setColor(ColorField.RED, redSum);
 		output.setColor(ColorField.GREEN, greenSum);
@@ -369,9 +369,9 @@ public class ImageProcessor {
 	 * @param source : data to convolve from
 	 * @return the new value at x,y after convolution
 	 */
-	private static double convolveOncePrimative(final int x, final int y,
-			final double[][] kernel, final double[][] source) {
-		double sum = 0.0;
+	private static float convolveOncePrimative(final int x, final int y,
+			final float[][] kernel, final float[][] source) {
+		float sum = 0;
 				
 		for (int kernelX = 0; kernelX < kernel.length; kernelX++) {
 			int xIndex = (x - kernel.length/2) + kernelX;
@@ -391,7 +391,7 @@ public class ImageProcessor {
 	/* colorspace ops */
 	/* public functions */
 	
-	public void rotateHue(double Theta) {
+	public void rotateHue(float Theta) {
 		Pixel localP;
 		RGB rgb = new RGB();
 		HSI hsi = new HSI();
@@ -402,9 +402,9 @@ public class ImageProcessor {
 				RawPixel localRaw = localP.get();
 
 				// get HSI values
-				hsi = RGBtoHSI(localRaw.getColorDouble(RawPixel.ColorField.RED),
-							   localRaw.getColorDouble(RawPixel.ColorField.GREEN),
-							   localRaw.getColorDouble(RawPixel.ColorField.BLUE));
+				hsi = RGBtoHSI(localRaw.getColorFloat(RawPixel.ColorField.RED),
+							   localRaw.getColorFloat(RawPixel.ColorField.GREEN),
+							   localRaw.getColorFloat(RawPixel.ColorField.BLUE));
 				
 				// rotate the hue
 				hsi.h = getEquivClass(hsi.h + Theta);
@@ -413,14 +413,14 @@ public class ImageProcessor {
 				rgb = HSItoRGB(hsi.h, hsi.s, hsi.i);
 				
 				// update the pixel with the new rgb value
-				localRaw.setColorAll(rgb.r, rgb.g, rgb.b, 1.0);
+				localRaw.setColorAll(rgb.r, rgb.g, rgb.b, 1);
 				localP.set(localRaw);
 			}
 		}
 	}
 	
 	
-	public void increaseSaturation(double deltaS) {
+	public void increaseSaturation(float deltaS) {
 		Pixel localP;
 		RGB rgb = new RGB();
 		HSI hsi = new HSI();
@@ -431,9 +431,9 @@ public class ImageProcessor {
 				RawPixel localRaw = localP.get();
 
 				// get HSI values
-				hsi = RGBtoHSI(localRaw.getColorDouble(RawPixel.ColorField.RED),
-							   localRaw.getColorDouble(RawPixel.ColorField.GREEN),
-							   localRaw.getColorDouble(RawPixel.ColorField.BLUE));
+				hsi = RGBtoHSI(localRaw.getColorFloat(RawPixel.ColorField.RED),
+							   localRaw.getColorFloat(RawPixel.ColorField.GREEN),
+							   localRaw.getColorFloat(RawPixel.ColorField.BLUE));
 				
 				// modify the saturation
 				hsi.s = hsi.s + deltaS;
@@ -442,7 +442,7 @@ public class ImageProcessor {
 				rgb = HSItoRGB(hsi.h, hsi.s, hsi.i);
 				
 				// update the pixel with the new rgb value
-				localRaw.setColorAll(rgb.r, rgb.g, rgb.b, 1.0);			
+				localRaw.setColorAll(rgb.r, rgb.g, rgb.b, 1);			
 				localP.set(localRaw);
 			}
 		}
@@ -453,8 +453,8 @@ public class ImageProcessor {
 		Pixel localP;
 		RGB rgb = new RGB();
 		HSI hsi = new HSI();
-		double minI = getMinI();
-		double maxI = getMaxI();
+		float minI = getMinI();
+		float maxI = getMaxI();
 		
 		for (int x = 0; x < workingImage_.getWidth(); x++) {
 			for (int y = 0; y < workingImage_.getHeight(); y++) {
@@ -462,9 +462,9 @@ public class ImageProcessor {
 				RawPixel localRaw = localP.get();
 
 				// get HSI values
-				hsi = RGBtoHSI(localRaw.getColorDouble(RawPixel.ColorField.RED),
-							   localRaw.getColorDouble(RawPixel.ColorField.GREEN),
-							   localRaw.getColorDouble(RawPixel.ColorField.BLUE));
+				hsi = RGBtoHSI(localRaw.getColorFloat(RawPixel.ColorField.RED),
+							   localRaw.getColorFloat(RawPixel.ColorField.GREEN),
+							   localRaw.getColorFloat(RawPixel.ColorField.BLUE));
 				
 				hsi.i = (hsi.i - minI)/(maxI - minI);
 				
@@ -472,17 +472,17 @@ public class ImageProcessor {
 				rgb = HSItoRGB(hsi.h, hsi.s, hsi.i);
 				
 				// update the pixel with the new rgb value
-				localRaw.setColorAll(rgb.r, rgb.g, rgb.b, 1.0);
+				localRaw.setColorAll(rgb.r, rgb.g, rgb.b, 1);
 				localP.set(localRaw);
 			}
 		}
 	}
 	
-	public double[][][] getHsi() {
-		double[][][] hsi = new double[3][workingImage_.getWidth()]
+	public float[][][] getHsi() {
+		float[][][] hsi = new float[3][workingImage_.getWidth()]
 				[workingImage_.getHeight()];
 		
-		double[][][] rgb = getRgb();
+		float[][][] rgb = getRgb();
 		
 		for (int x = 0; x < hsi[0].length; x++) {
 			for (int y = 0; y < hsi[0][0].length; y++) {
@@ -496,8 +496,8 @@ public class ImageProcessor {
 		return hsi;
 	}
 	
-	public double[][][] getRgb() {
-		double[][][] rgb = new double[3][workingImage_.getWidth()]
+	public float[][][] getRgb() {
+		float[][][] rgb = new float[3][workingImage_.getWidth()]
 				[workingImage_.getHeight()];
 		
 		Iterator<Pixel> pixItter = iterator();
@@ -506,20 +506,20 @@ public class ImageProcessor {
 			RawPixel rawPix = pix.get();
 			
 			rgb[0][pix.getX()][pix.getY()] =
-					rawPix.getColorDouble(RawPixel.ColorField.RED);
+					rawPix.getColorFloat(RawPixel.ColorField.RED);
 			
 			rgb[1][pix.getX()][pix.getY()] =
-					rawPix.getColorDouble(RawPixel.ColorField.GREEN);
+					rawPix.getColorFloat(RawPixel.ColorField.GREEN);
 			
 			rgb[2][pix.getX()][pix.getY()] =
-					rawPix.getColorDouble(RawPixel.ColorField.BLUE);
+					rawPix.getColorFloat(RawPixel.ColorField.BLUE);
 		}
 		
 		return rgb;
 	}
 	
-	public double[][] getGreyscale() {
-		double[][] greyscale = new double[workingImage_.getWidth()]
+	public float[][] getGreyscale() {
+		float[][] greyscale = new float[workingImage_.getWidth()]
 				[workingImage_.getHeight()];
 		
 		Iterator<Pixel> pixItter = iterator();
@@ -528,15 +528,15 @@ public class ImageProcessor {
 			RawPixel rawPix = pix.get();
 			
 			greyscale[pix.getX()][pix.getY()] = (
-					( rawPix.getColorDouble(RawPixel.ColorField.RED)
-					+ rawPix.getColorDouble(RawPixel.ColorField.GREEN)
-					+ rawPix.getColorDouble(RawPixel.ColorField.BLUE)
-					) / 3.0);
+					( rawPix.getColorFloat(RawPixel.ColorField.RED)
+					+ rawPix.getColorFloat(RawPixel.ColorField.GREEN)
+					+ rawPix.getColorFloat(RawPixel.ColorField.BLUE)
+					) / 3F);
 		}		
 		return greyscale;
 	}
 	
-	public void setFromRgb(double[][][] rgb) {
+	public void setFromRgb(float[][][] rgb) {
 		Iterator<Pixel> pixItter = iterator();
 		while (pixItter.hasNext()) {
 			Pixel pix = pixItter.next();
@@ -552,7 +552,7 @@ public class ImageProcessor {
 		}
 	}
 	
-	public void setFromGreyscale(double[][] greyscale) {
+	public void setFromGreyscale(float[][] greyscale) {
 		Iterator<Pixel> pixItter = iterator();
 		while (pixItter.hasNext()) {
 			Pixel pix = pixItter.next();
@@ -568,7 +568,7 @@ public class ImageProcessor {
 		}
 	}
 	
-	public void setFromHsi(double[][][] hsi) {
+	public void setFromHsi(float[][][] hsi) {
 		Iterator<Pixel> pixItter = iterator();
 		while (pixItter.hasNext()) {
 			Pixel pix = pixItter.next();
@@ -589,28 +589,28 @@ public class ImageProcessor {
 	/* RGB to HSI conversion functions */
 	
 	// DO NOT TOUCH THIS, IT WORKS, DON'T ASK WHY
-	private HSI RGBtoHSI(double R, double G, double B) {
+	private HSI RGBtoHSI(float R, float G, float B) {
 		
 		HSI hsi = new HSI(0,0,0);
-		double r, g, b, w, i;
+		float r, g, b, w, i;
 		
 		i = R + G + B;
-		hsi.i = i/3.0;
+		hsi.i = i/3;
 		r = R/i;
 		g = G/i;
 		b = B/i;
 		
 		if (R == G && G == B){
-			hsi.s = 0.0;
-			hsi.h = 0.0;
+			hsi.s = 0;
+			hsi.h = 0;
 		} else {
-			w = 0.5*(2*R - G - B)/Math.sqrt((R-G)*(R-G) + (R-B)*(G-B));
+			w = (float)0.5*(2*R - G - B)/(float)Math.sqrt((R-G)*(R-G) + (R-B)*(G-B));
 			if (w > 1) {
 				w = 1;
 			} else if (w < -1) {
 				w = -1;
 			}
-			hsi.h = Math.acos(w);
+			hsi.h = (float)Math.acos(w);
 			if (hsi.h < 0) {
 				System.err.print("LabSixProcessor.RHBtoHSI: error. got H < 0\n");
 			}
@@ -623,12 +623,12 @@ public class ImageProcessor {
 	}
 	
 	// DO NOT TOUCH THIS, IT WORKS, DON'T ASK WHY
-	private RGB HSItoRGB(double H, double S, double I) {
+	private RGB HSItoRGB(float H, float S, float I) {
 		RGB rgb = new RGB(0,0,0);
 		
-		double r = 0;
-		double g = 0;
-		double b = 0;
+		float r = 0;
+		float g = 0;
+		float b = 0;
 		
 		if (S > 1) {
 			S = 1;
@@ -644,18 +644,18 @@ public class ImageProcessor {
 			if ( H < 0 ){
 				System.err.print("LabSixProcessor.HSItoRGB: error. got H < 0.\n");
 			} else if (H >= 0 && H < TAU/3.0) {
-				b = (1-S)/3.0;
-				r = (1 + S*Math.cos(H)/Math.cos(Math.PI/3.0 -H ))/3.0;
+				b = (1-S)/3f;
+				r = (1 + S*(float)Math.cos(H)/(float)Math.cos(Math.PI/3.0 -H ))/3f;
 				g = 1 - b - r;
 			} else if (H >= 2*(Math.PI/3.0) && H < 4*(Math.PI/3.0)) {
 				H -= TAU/3.0;
-				r = (1-S)/3.0;
-				g = (1 + S*Math.cos(H)/Math.cos(Math.PI/3.0 -H ))/3.0;
+				r = (1-S)/3f;
+				g = (1 + S*(float)Math.cos(H)/(float)Math.cos(Math.PI/3.0 -H ))/3f;
 				b = 1 - r - g;
 			} else if (H >= 4*(Math.PI/3.0) && H < TAU) {
 				H -= 4*Math.PI/3.0;				
-				g = (1-S)/3.0;
-				b = (1 + S*Math.cos(H)/Math.cos(Math.PI/3.0 -H ))/3.0;
+				g = (1-S)/3f;
+				b = (1 + S*(float)Math.cos(H)/(float)Math.cos(Math.PI/3.0 -H ))/3f;
 				r = 1 - g - b;
 			} else {
 				System.err.print("LabSixProcessor.HSItoRGB: error. got H >= 2*pi\n");
@@ -677,24 +677,24 @@ public class ImageProcessor {
 			rgb.b = 3*I*b;
 			
 			if (rgb.r > 1) {
-				rgb.r = 1.0;
+				rgb.r = 1;
 			}
 			if (rgb.g > 1) {
-				rgb.g = 1.0;
+				rgb.g = 1;
 			}
 			if (rgb.b > 1) {
-				rgb.b = 1.0;
+				rgb.b = 1;
 			}
 		}
 		return rgb;
 	}
 	
-	private double minThree(double x, double y, double z) {
+	private float minThree(float x, float y, float z) {
 		return Math.min(x, Math.min(y,z));
 	}
 	
-	private double getMinI() {
-		double min = Double.POSITIVE_INFINITY;
+	private float getMinI() {
+		float min = Float.POSITIVE_INFINITY;
 		Pixel localP;
 		HSI hsi = new HSI();
 		
@@ -704,9 +704,9 @@ public class ImageProcessor {
 				RawPixel localRaw = localP.get();
 
 				// get HSI values
-				hsi = RGBtoHSI(localRaw.getColorDouble(RawPixel.ColorField.RED),
-							   localRaw.getColorDouble(RawPixel.ColorField.GREEN),
-							   localRaw.getColorDouble(RawPixel.ColorField.BLUE));
+				hsi = RGBtoHSI(localRaw.getColorFloat(RawPixel.ColorField.RED),
+							   localRaw.getColorFloat(RawPixel.ColorField.GREEN),
+							   localRaw.getColorFloat(RawPixel.ColorField.BLUE));
 				
 				if (hsi.i < min) {
 					min = hsi.i;
@@ -717,8 +717,8 @@ public class ImageProcessor {
 		return min;
 	}
 	
-	private double getMaxI() {
-		double max = Double.NEGATIVE_INFINITY;
+	private float getMaxI() {
+		float max = Float.NEGATIVE_INFINITY;
 		Pixel localP;
 		HSI hsi = new HSI();
 		
@@ -728,9 +728,9 @@ public class ImageProcessor {
 				RawPixel localRaw = localP.get();
 
 				// get HSI values
-				hsi = RGBtoHSI(localRaw.getColorDouble(RawPixel.ColorField.RED),
-						   localRaw.getColorDouble(RawPixel.ColorField.GREEN),
-						   localRaw.getColorDouble(RawPixel.ColorField.BLUE));
+				hsi = RGBtoHSI(localRaw.getColorFloat(RawPixel.ColorField.RED),
+						   localRaw.getColorFloat(RawPixel.ColorField.GREEN),
+						   localRaw.getColorFloat(RawPixel.ColorField.BLUE));
 				
 				if (hsi.i > max) {
 					max = hsi.i;
@@ -744,8 +744,8 @@ public class ImageProcessor {
 	 * @param theta an angle in radians 
 	 * @return the equivalent angle in the range 0 <= x < tau
 	 */
-	private double getEquivClass(double theta) {
-		double newTheta;
+	private float getEquivClass(float theta) {
+		float newTheta;
 		if (theta < 0) {
 			newTheta = theta + TAU*(1 + (int)(-theta/TAU) );
 		} else if (theta >= TAU) {
@@ -763,38 +763,38 @@ public class ImageProcessor {
 	}
 	
 	private class RGB {
-		public double r = 0.0;
-		public double g = 0.0;
-		public double b = 0.0;
+		public float r = 0;
+		public float g = 0;
+		public float b = 0;
 		
-		public RGB(double red, double green, double blue) {
+		public RGB(float red, float green, float blue) {
 			r = red;
 			g = green;
 			b = blue;
 		}
 		
 		public RGB() {
-			r = 0.0;
-			g = 0.0;
-			b = 0.0;
+			r = 0;
+			g = 0;
+			b = 0;
 		}
 	}
 	
 	private class HSI {
-		public double h = 0.0;
-		public double s = 0.0;
-		public double i = 0.0;
+		public float h = 0;
+		public float s = 0;
+		public float i = 0;
 		
-		public HSI(double hue, double sat, double intensity) {
+		public HSI(float hue, float sat, float intensity) {
 			h = hue;
 			s = sat;
 			i = intensity;
 		}
 		
 		public HSI() {
-			h = 0.0;
-			s = 0.0;
-			i = 0.0;
+			h = 0;
+			s = 0;
+			i = 0;
 		}
 	}
 	
@@ -876,7 +876,7 @@ public class ImageProcessor {
 			int[] counts = shadeCounts.get(colorItter.next());
 			
 			for (int i = 0; i < counts.length; i++) {
-				counts[i] *= (double)NUM_COLORS/(double)max;
+				counts[i] *= (float)NUM_COLORS/(float)max;
 			}
 		}
 	}
@@ -971,15 +971,15 @@ public class ImageProcessor {
 	
 	/* lab 2: public functions */
 	
-	public void resize(double xRatio, double yRatio) {
-		int newWidth = (int)((double)workingImage_.getWidth()*xRatio); 
-		int newHeight = (int)((double)workingImage_.getHeight()*yRatio);
+	public void resize(float xRatio, float yRatio) {
+		int newWidth = (int)((float)workingImage_.getWidth()*xRatio); 
+		int newHeight = (int)((float)workingImage_.getHeight()*yRatio);
 		BufferedImage result = new BufferedImage(newWidth, newHeight, imageType_);
 		
 		resizeWorkingTo(result);
 	}
 	
-	public void rotate(double theta) {
+	public void rotate(float theta) {
 		BufferedImage result = new BufferedImage(workingImage_.getWidth(), 
 												 workingImage_.getHeight(),
 												 imageType_);	
@@ -1006,13 +1006,13 @@ public class ImageProcessor {
 			int destY = localPixel.getY();
 		
 			/* find where our source X and Y */
-			double sourceX = (double)destX
-							* (double)(workingImage_.getWidth() - 1)
-							/ (double)(output.getWidth() - 1);
+			float sourceX = (float)destX
+							* (float)(workingImage_.getWidth() - 1)
+							/ (float)(output.getWidth() - 1);
 			
-			double sourceY = (double)destY
-							* (double)(workingImage_.getHeight() - 1)
-							/ (double)(output.getHeight() - 1);
+			float sourceY = (float)destY
+							* (float)(workingImage_.getHeight() - 1)
+							/ (float)(output.getHeight() - 1);
 			
 			/* incoming ternary operators */
 			a = a.inImage((int)sourceX, (int)sourceY)
@@ -1034,8 +1034,8 @@ public class ImageProcessor {
 					: new Pixel(workingImage_);
 					
 			/* find the remainders */
-			double u = sourceX % 1.0;
-			double v = sourceY % 1.0;
+			float u = sourceX % 1;
+			float v = sourceY % 1;
 			
 			a.set(a.get().multiply(1 - v - u - u*v));
 			b.set(b.get().multiply(u - u*v));
@@ -1057,7 +1057,7 @@ public class ImageProcessor {
 	/**
 	 * @param output the BufferedImage to write output to.
 	 */
-	private void rotateWorkingTo(BufferedImage output, double theta) {
+	private void rotateWorkingTo(BufferedImage output, float theta) {
 		ImageProcessor proc = new ImageProcessor(output);
 		
 		/* the four pixels we will work with for each interpolation*/
@@ -1078,14 +1078,14 @@ public class ImageProcessor {
 			int destY = localPixel.getY();
 				
 			/* find where our source X and Y are (algorithm given in assignment) */
-			double sourceX = ( Math.cos(theta)*(destX - xCenter) +
-					    Math.sin(theta)*(destY - yCenter) + xCenter); 
-			double sourceY = (-Math.sin(theta)*(destX - xCenter) + 
-					    Math.cos(theta)*(destY - yCenter) + yCenter); 
+			float sourceX = ( (float)Math.cos(theta)*(destX - xCenter) +
+					(float)Math.sin(theta)*(destY - yCenter) + xCenter); 
+			float sourceY = (-(float)Math.sin(theta)*(destX - xCenter) + 
+					(float)Math.cos(theta)*(destY - yCenter) + yCenter); 
 			
 			/* find the remainders */
-			double u = sourceX % 1;
-			double v = sourceY % 1;
+			float u = sourceX % 1;
+			float v = sourceY % 1;
 			
 			/* incoming ternary operators */
 			a = a.inImage((int)sourceX, (int)sourceY)
@@ -1127,7 +1127,7 @@ public class ImageProcessor {
 	
 	public BufferedImage greyHisto() {
 		int[] colorCounts = countColorsGreyscale();
-		double pixelWeight = ((double)NUM_COLORS)/arrayMax(colorCounts);
+		float pixelWeight = ((float)NUM_COLORS)/arrayMax(colorCounts);
 		normalizeColorCounts(colorCounts, pixelWeight);
 		
 		return histogramFromArray(colorCounts);
@@ -1137,7 +1137,7 @@ public class ImageProcessor {
 	public BufferedImage stretchedGreyHisto() {
 		int[] colorCounts = countColorsGreyscale();
 		int[] stretchedColorCounts;
-		double pixelWeight = ((double)NUM_COLORS)/arrayMax(colorCounts);
+		float pixelWeight = ((float)NUM_COLORS)/arrayMax(colorCounts);
 		normalizeColorCounts(colorCounts, pixelWeight);
 		
 		int minIndex = firstNonZeroIndex(colorCounts);
@@ -1151,7 +1151,7 @@ public class ImageProcessor {
 	public BufferedImage stretchedInterpGreyHisto() {
 		int[] colorCounts = countColorsGreyscale();
 		int[] stretchedColorCounts;
-		double pixelWeight = ((double)NUM_COLORS)/arrayMax(colorCounts);
+		float pixelWeight = ((float)NUM_COLORS)/arrayMax(colorCounts);
 		normalizeColorCounts(colorCounts, pixelWeight);
 		
 		int minIndex = firstNonZeroIndex(colorCounts);
@@ -1162,7 +1162,7 @@ public class ImageProcessor {
 		return histogramFromArray(stretchedColorCounts);
 	}
 	
-	public BufferedImage cutoffHisto(double cutoffPercent) {
+	public BufferedImage cutoffHisto(float cutoffPercent) {
 		assert(0 <= cutoffPercent && 1 >= cutoffPercent);
 		
 		int[] colorCounts = countColorsGreyscale();
@@ -1172,7 +1172,7 @@ public class ImageProcessor {
 		int maxIndex = maxIndexCuttof(colorCounts, cutoffPercent);
 		stretchedColorCounts = stretchArray(colorCounts, minIndex, maxIndex);
 		
-		double pixelWeight = ((double)NUM_COLORS)/arrayMax(stretchedColorCounts);
+		float pixelWeight = ((float)NUM_COLORS)/arrayMax(stretchedColorCounts);
 		normalizeColorCounts(stretchedColorCounts, pixelWeight);
 		
 		return histogramFromArray(stretchedColorCounts);
@@ -1185,7 +1185,7 @@ public class ImageProcessor {
 		return stretchImageMinMax(minIndex, maxIndex);
 	}
 	
-	public BufferedImage stretchCutoff(double cutoffPercent) {
+	public BufferedImage stretchCutoff(float cutoffPercent) {
 		assert(0 <= cutoffPercent && 1 >= cutoffPercent);
 		
 		int[] colorCounts = countColorsGreyscale();
@@ -1225,10 +1225,10 @@ public class ImageProcessor {
 	/**
 	 * Maps the number of occurances of each color to the range 0, NUM_COLORS
 	 */
-	private void normalizeColorCounts(int[] colorCounts, double weight) {
+	private void normalizeColorCounts(int[] colorCounts, float weight) {
 		
 		for (int i=0; i < colorCounts.length; i++) {
-			colorCounts[i] = (int)((double)colorCounts[i]*weight);
+			colorCounts[i] = (int)((float)colorCounts[i]*weight);
 		}
 	}
 	
@@ -1319,7 +1319,7 @@ public class ImageProcessor {
 	
 	private int transform(int greyValue, int min, int max) {
 		int range = max - min;
-		return (int)(NUM_COLORS*(double)(greyValue - min)/range);
+		return (int)(NUM_COLORS*(float)(greyValue - min)/range);
 	}
 	
 	/**
@@ -1347,16 +1347,16 @@ public class ImageProcessor {
 	/**
 	 * @param colorCounts: int[] where each element is the number of
 	 * occurrences of the color value of its index
-	 * @param cutoffPercent: double between 0 and 1 inclusive. The amount of
+	 * @param cutoffPercent: float between 0 and 1 inclusive. The amount of
 	 * pixels to cut off
 	 * @return the lower index into colorCounts at which cutoffPercent of
 	 * the points are below that index
 	 */
-	private int minIndexCuttof(int[] colorCounts, double cutoffPercent) {
+	private int minIndexCuttof(int[] colorCounts, float cutoffPercent) {
 		assert(0 <= cutoffPercent && 1 >= cutoffPercent);
 		
 		int totalPixels = workingImage_.getWidth() * workingImage_.getHeight();
-		int pixelsToCuttof = (int)((double)totalPixels*cutoffPercent);
+		int pixelsToCuttof = (int)((float)totalPixels*cutoffPercent);
 		int pixelsSeen = 0;
 		int index = 0;
 		
@@ -1371,16 +1371,16 @@ public class ImageProcessor {
 	/**
 	 * @param colorCounts: int[] where each element is the number of
 	 * occurrences of the color value of its index
-	 * @param cutoffPercent: double between 0 and 1 inclusive. The amount of
+	 * @param cutoffPercent: float between 0 and 1 inclusive. The amount of
 	 * pixels to cut off
 	 * @return the upper index into colorCounts at which cutoffPercent of
 	 * the points are above that index
 	 */
-	private int maxIndexCuttof(int[] colorCounts, double cutoffPercent) {
+	private int maxIndexCuttof(int[] colorCounts, float cutoffPercent) {
 		assert(0 <= cutoffPercent && 1 >= cutoffPercent);
 		
 		int totalPixels = workingImage_.getWidth() * workingImage_.getHeight();
-		int pixelsToCuttof = (int)((double)totalPixels*cutoffPercent);
+		int pixelsToCuttof = (int)((float)totalPixels*cutoffPercent);
 		int pixelsSeen = 0;
 		int index = colorCounts.length - 1;
 		
@@ -1407,27 +1407,27 @@ public class ImageProcessor {
 	/* lab 5 public functions */
 	
 	public BufferedImage equalize() {
-		double[] lookupTable = getEqualizeArray();
+		float[] lookupTable = getEqualizeArray();
 		return mapLookup(lookupTable);
 	}
 	
-	public BufferedImage histogramSpec(double[] histogram) {
+	public BufferedImage histogramSpec(float[] histogram) {
 		assert(histogram.length == NUM_COLORS);
 		
-		double[] outputLT = getLookupTable(histogram);
-		double[] inputLT = getEqualizeArray();
+		float[] outputLT = getLookupTable(histogram);
+		float[] inputLT = getEqualizeArray();
 		int[] totalLT = getMapping(inputLT, outputLT); 
 		return mapLookup(totalLT);
 	}
 	
-	public static void normalize(double[] array) {
-		double volume = 0;
-		double normalFactor;
+	public static void normalize(float[] array) {
+		float volume = 0;
+		float normalFactor;
 		for (int i = 0; i < array.length; i++) {
 			volume += array[i];
 		}
 		
-		normalFactor = 1.0/volume;
+		normalFactor = 1f/volume;
 		
 		for (int i = 0; i < array.length; i++) {
 			array[i] *= normalFactor;
@@ -1436,9 +1436,9 @@ public class ImageProcessor {
 	
 	/* private functions */	
 	
-	private double[] getHistogram() {
-		double[] histogram = new double[NUM_COLORS];
-		double pixelWeight = 1.0/(workingImage_.getWidth() 
+	private float[] getHistogram() {
+		float[] histogram = new float[NUM_COLORS];
+		float pixelWeight = 1f/(workingImage_.getWidth() 
 								* workingImage_.getHeight());
 
 		Iterator<Pixel> pixItter = iterator();
@@ -1453,10 +1453,10 @@ public class ImageProcessor {
 		return histogram;
 	}
 	
-	private double[] getLookupTable(double[] histogram) {
+	private float[] getLookupTable(float[] histogram) {
 		assert(histogram.length == NUM_COLORS);
-		double[] lookupTable = new double[NUM_COLORS];
-		double sum = 0.0;
+		float[] lookupTable = new float[NUM_COLORS];
+		float sum = 0;
 		
 		for(int i = 0; i < NUM_COLORS; i++) {
 			sum += histogram[i];
@@ -1466,7 +1466,7 @@ public class ImageProcessor {
 		return lookupTable;
 	}
 	
-	private BufferedImage mapLookup(double[] lookupTable) {
+	private BufferedImage mapLookup(float[] lookupTable) {
 		BufferedImage output = blankCopy();
 		
 		Iterator<Pixel> pixItter = iterator();
@@ -1507,13 +1507,13 @@ public class ImageProcessor {
 		return output;
 	}
 	
-	private double[] getEqualizeArray() {
-		double[] histogram = getHistogram();
-		double[] lookupTable = getLookupTable(histogram);
+	private float[] getEqualizeArray() {
+		float[] histogram = getHistogram();
+		float[] lookupTable = getLookupTable(histogram);
 		return lookupTable;
 	}
 	
-	private int[] getMapping(double[] inputLT, double[] outputLT) {
+	private int[] getMapping(float[] inputLT, float[] outputLT) {
 		assert(inputLT.length == outputLT.length);
 		int[] maping = new int[inputLT.length];
 		
@@ -1524,8 +1524,8 @@ public class ImageProcessor {
 		return maping;
 	}
 	
-	private int closestIndex(double[] array, double value) {
-		double closest = array[0];
+	private int closestIndex(float[] array, float value) {
+		float closest = array[0];
 		int closestIndex = 0;
 		for (int i = 0; i < array.length; i++) {
 			if (Math.abs(array[i] - value) < Math.abs(array[i] - closest)) {

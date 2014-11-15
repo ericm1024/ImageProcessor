@@ -28,8 +28,8 @@ public class LabSeven {
 	}
 	
 	public static void problemTwo() {
-		double numSigma = 2.0;
-		double sigma = 7.0/(2*numSigma);
+		float numSigma = 2;
+		float sigma = 7f/(2*numSigma);
 		File outputFile1 = new File(WORK_DIR+"gauss-kernel-sigma="+sigma+"pixels.png");
 		
 		proc7.readWorkingImage(baseFile);
@@ -51,7 +51,7 @@ public class LabSeven {
 		int side = 5;
 		int thickness = 1;	
 		int gaussSize = 5;
-		double numSigma = 2.0;
+		float numSigma = 2f;
 		
 		File outputFile1 = new File(WORK_DIR+"best-cleanup.png");
 		proc7.readWorkingImage(baseFile);

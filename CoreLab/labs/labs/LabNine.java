@@ -34,8 +34,8 @@ public class LabNine {
 		File out1 = new File(OUT_DIR+name+"-laplace-1.png");
 		File out2 = new File(OUT_DIR+name+"-laplace-2.png");
 		
-		double[][] laplace1 = ConvolveLib.KERNEL_LAB9_LAPLACE_1;
-		double[][] laplace2 = ConvolveLib.KERNEL_LAB9_LAPLACE_2;
+		float[][] laplace1 = ConvolveLib.KERNEL_LAB9_LAPLACE_1;
+		float[][] laplace2 = ConvolveLib.KERNEL_LAB9_LAPLACE_2;
 		
 		cproc.readWorkingImage(starter);
 		cproc.convolve(laplace1);
@@ -48,15 +48,15 @@ public class LabNine {
 	
 	private static void  gauss(File starter, final String name) {
 		int width = 15;
-		double numSigma = 3.0;
-		double sigma = ((double)width)/(2*numSigma);
-		double[][] gauss = ConvolveLib.getGaussKernel(width, numSigma);
+		float numSigma = 3;
+		float sigma = ((float)width)/(2*numSigma);
+		float[][] gauss = ConvolveLib.getGaussKernel(width, numSigma);
 		
 		int side = 3;
 		int thickness = 1;
 		Boolean[][] filter = ConvolveLib.getCrossFilter(side, thickness);
 		
-		double[][] laplace1 = ConvolveLib.KERNEL_LAB9_LAPLACE_1;
+		float[][] laplace1 = ConvolveLib.KERNEL_LAB9_LAPLACE_1;
 		
 		File out = new File(OUT_DIR+name+"-gauss-s="+sigma+"-cross-filter-lap1.png");
 		
@@ -69,17 +69,17 @@ public class LabNine {
 	
 	private static void laplaceOfGauss(File starter, final String name) {
 		int width = 11;
-		double numSigma = 4.0;
-		double sigma = ((double)width)/(2*numSigma);
+		float numSigma = 4;
+		float sigma = ((float)width)/(2*numSigma);
 		
 		File out1 = new File(OUT_DIR+name+"-gauss-s="+sigma+"-laplace1.png");
 		File out2 = new File(OUT_DIR+name+"-gauss-s="+sigma+"-laplace2.png");
 		File out3 = new File(OUT_DIR+name+"-laplace-of-gauss-5x5-given.png");
 		
-		double[][] gauss = ConvolveLib.getGaussKernel(width, numSigma);
-		double[][] laplace1 = ConvolveLib.KERNEL_LAB9_LAPLACE_1;
-		double[][] laplace2 = ConvolveLib.KERNEL_LAB9_LAPLACE_2;
-		double[][] lapOfGauss = ConvolveLib.KERNEL_LAB9_LAPLACE_OF_GAUSS_5;
+		float[][] gauss = ConvolveLib.getGaussKernel(width, numSigma);
+		float[][] laplace1 = ConvolveLib.KERNEL_LAB9_LAPLACE_1;
+		float[][] laplace2 = ConvolveLib.KERNEL_LAB9_LAPLACE_2;
+		float[][] lapOfGauss = ConvolveLib.KERNEL_LAB9_LAPLACE_OF_GAUSS_5;
 		
 		cproc.readWorkingImage(starter);
 		cproc.convolve(gauss);

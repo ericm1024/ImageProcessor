@@ -6,86 +6,86 @@ public class ConvolveLib {
 	
 	/* lab 7 */ 
 	
-	public static final double[][] KERNEL_LAB7_W5 =
+	public static final float[][] KERNEL_LAB7_W5 =
 		{{1,2,1}, {2,4,2}, {1,2,1}};
 	
 	/* lab 8 */
 	
-	public static final double[][] KERNEL_LAB8_HB1 =
+	public static final float[][] KERNEL_LAB8_HB1 =
 		{{-1,-1,-1}, {-1,8,-1}, {-1,-1,-1}};
 	
-	public static final double[][] KERNEL_LAB8_HB2 =
+	public static final float[][] KERNEL_LAB8_HB2 =
 		{{0,-1,0}, {-1,4,-1}, {0,-1,0}};
 	
 	/* lab 9 */
 	
-	public static final double[][] KERNEL_LAB9_LAPLACE_1 = 
+	public static final float[][] KERNEL_LAB9_LAPLACE_1 = 
 		{{0,1,0}, {1,-4,1}, {0,1,0}};
 	
-	public static final double[][] KERNEL_LAB9_LAPLACE_2 =
+	public static final float[][] KERNEL_LAB9_LAPLACE_2 =
 		{{-1,-1,-1}, {-1,8,-1}, {-1,-1,-1}};
 	
-	public static final double[][] KERNEL_LAB9_LAPLACE_OF_GAUSS_5 =
+	public static final float[][] KERNEL_LAB9_LAPLACE_OF_GAUSS_5 =
 		{{0,0,1,0,0}, {0,1,2,1,0}, {1,2,-16,2,1}, {0,1,2,1,0}, {0,0,1,0,0}};
 	
 	/* gradient kernels */
 	
-	public static final double[][] GRAD_ROBERTS_X = {{-1,1}, {0,0}};
+	public static final float[][] GRAD_ROBERTS_X = {{-1,1}, {0,0}};
 	
-	public static final double[][] GRAD_ROBERTS_Y = {{-1,0}, {1,0}};
+	public static final float[][] GRAD_ROBERTS_Y = {{-1,0}, {1,0}};
 	
-	public static final double[][] GRAD_SOBEL_X =
+	public static final float[][] GRAD_SOBEL_X =
 		{{-1,0,1}, {-2,0,2}, {-1,0,1}};
 	
-	public static final double[][] GRAD_SOBEL_Y =
+	public static final float[][] GRAD_SOBEL_Y =
 		{{-1,-2,1}, {0,0,0}, {1,2,1}};
 	
-	public static final double[][] GRAD_PREWITT_X_3 =
+	public static final float[][] GRAD_PREWITT_X_3 =
 		{{-1,0,1}, {-1,0,1}, {-1,0,1}};
 	
-	public static final double[][] GRAD_PREWITT_Y_3 =
+	public static final float[][] GRAD_PREWITT_Y_3 =
 		{{-1,-1,-1}, {0,0,0}, {1,1,1}}; 
 	
-	public static final double[][] GRAD_PREWITT_X_4 =
+	public static final float[][] GRAD_PREWITT_X_4 =
 		{{-3,-1,1,3}, {-3,-1,1,3}, {-3,-1,1,3}, {-3,-1,1,3}};
 	
-	public static final double[][] GRAD_PREWITT_Y_4 =
+	public static final float[][] GRAD_PREWITT_Y_4 =
 		{{-3,-3,-3,-3}, {-1,-1,-1,-1}, {1,1,1,1}, {3,3,3,3}};
 	
 	/* compass operators */
 	
-	public static final double[][] GRAD_COMP_E_3 =
+	public static final float[][] GRAD_COMP_E_3 =
 		{{-1,0,1}, {-1,0,1}, {-1,0,1}};
 	
-	public static final double[][] GRAD_COMP_W_3 = 
+	public static final float[][] GRAD_COMP_W_3 = 
 		{{1,0,-1}, {1,0,-1}, {1,0,-1}};
 	
-	public static final double[][] GRAD_COMP_N_3 =
+	public static final float[][] GRAD_COMP_N_3 =
 		{{1,1,1}, {0,0,0}, {-1,-1,-1}};
 	
-	public static final double[][] GRAD_COMP_S_3 = 
+	public static final float[][] GRAD_COMP_S_3 = 
 		{{-1,-1,-1}, {0,0,0}, {1,1,1}};
 	
 	/* all pass kernel */
 	
-	public static final double[][] KERNEL_ALLPASS_3 =
+	public static final float[][] KERNEL_ALLPASS_3 =
 		{{0,0,0}, {0,1,0}, {0,0,0}};
 	
-	public static final double[][] KERNEL_ALLPASS_5 =
+	public static final float[][] KERNEL_ALLPASS_5 =
 		{{0,0,0,0,0}, {0,0,0,0,0}, {0,0,1,0,0}, {0,0,0,0,0}, {0,0,0,0,0}};
 	
 	/**
 	 * creates a high pass kernel from a low pass kernel
 	 */
-	public static double[][] getHpFromLp(double[][] kernel) {
-		double[][] hpFilter = new double[kernel.length][kernel[0].length];
+	public static float[][] getHpFromLp(float[][] kernel) {
+		float[][] hpFilter = new float[kernel.length][kernel[0].length];
 		
 		for(int x = 0; x < hpFilter.length; x++) {
 			for(int y = 0; y < hpFilter[0].length; y++) {
 		
 				// if we're in the very middle
 				if (x == hpFilter.length/2 && y == hpFilter[0].length/2) {
-					hpFilter[x][y] = 1.0 - kernel[x][y];
+					hpFilter[x][y] = 1 - kernel[x][y];
 				} else {
 					hpFilter[x][y] = - kernel[x][y];
 				}
@@ -97,15 +97,15 @@ public class ConvolveLib {
 	/**
 	 * creates a high boost kernel from a low pass kernel
 	 */
-	public static double[][] getHbFromHp(double[][] kernel, double multiplier) {
-		double[][] hbFilter = new double[kernel.length][kernel[0].length];
+	public static float[][] getHbFromHp(float[][] kernel, float multiplier) {
+		float[][] hbFilter = new float[kernel.length][kernel[0].length];
 		
 		for(int x = 0; x < hbFilter.length; x++) {
 			for(int y = 0; y < hbFilter[0].length; y++) {
 		
 				// if we're in the very middle
 				if (x == hbFilter.length/2 && y == hbFilter[0].length/2) {
-					hbFilter[x][y] = 1.0 + multiplier * kernel[x][y];
+					hbFilter[x][y] = 1 + multiplier * kernel[x][y];
 				} else {
 					hbFilter[x][y] = - multiplier * kernel[x][y];
 				}
@@ -117,9 +117,9 @@ public class ConvolveLib {
 	/**
 	 * @return the difference of the two kernels, i.e.k1 - k2
 	 */
-	public static double[][] kernelDifference(double[][] k1, double[][] k2) {
+	public static float[][] kernelDifference(float[][] k1, float[][] k2) {
 		assert(k1.length == k2.length && k1[0].length == k2[0].length);
-		double[][] result = new double[k1.length][k1[0].length];
+		float[][] result = new float[k1.length][k1[0].length];
 		
 		for (int x = 0; x < result.length; x++) {
 			for (int y = 0; y < result[0].length; y++) {
@@ -132,9 +132,9 @@ public class ConvolveLib {
 	/**
 	 * @return the sum of the two kernels, i.e.k1 + k2
 	 */
-	public static double[][] kernelSum(double[][] k1, double[][] k2) {
+	public static float[][] kernelSum(float[][] k1, float[][] k2) {
 		assert(k1.length == k2.length && k1[0].length == k2[0].length);
-		double[][] result = new double[k1.length][k1[0].length];
+		float[][] result = new float[k1.length][k1[0].length];
 		
 		for (int x = 0; x < result.length; x++) {
 			for (int y = 0; y < result[0].length; y++) {
@@ -147,9 +147,9 @@ public class ConvolveLib {
 	/**
 	 * @return multiplies every element in kernel by c
 	 */
-	public static double[][] multiplyScalar(double[][] kernel, double c) {
+	public static float[][] multiplyScalar(float[][] kernel, float c) {
 		assert(kernel.length == kernel.length);
-		double[][] result = new double[kernel.length][kernel[0].length];
+		float[][] result = new float[kernel.length][kernel[0].length];
 		
 		for (int x = 0; x < result.length; x++) {
 			for (int y = 0; y < result[0].length; y++) {
@@ -162,22 +162,22 @@ public class ConvolveLib {
 	
 	/* low pass filtering kernels  */
 	
-	public static double[][] getSquareKernel(int width) {
+	public static float[][] getSquareKernel(int width) {
 		assert (width%2 == 1); // odd
-		double[][] kernel = new double[width][width];
+		float[][] kernel = new float[width][width];
 
 		for (int i = 0; i < kernel.length; i++) {
 			for (int j = 0; j < kernel[0].length; j++) {
-				kernel[i][j] = 1.0;
+				kernel[i][j] = 1;
 			}
 		}
 		return ConvolveLib.normalizeKernel(kernel);
 	}
 	
-	public static double[][] getGaussKernel(int width, double numSigma) {
+	public static float[][] getGaussKernel(int width, float numSigma) {
 		assert (width%2 == 1); // odd 
- 		double[][] kernel = new double[width][width];
- 		double sigma = (double)width/(2*numSigma);
+ 		float[][] kernel = new float[width][width];
+ 		float sigma = (float)width/(2*numSigma);
  		int offset = width/2;
 		
 		for (int x = 0; x < kernel.length; x++) {
@@ -188,11 +188,11 @@ public class ConvolveLib {
 		return normalizeKernel(kernel);
 	}
 	
-	public static double[][] getApKernel(int width) {
+	public static float[][] getApKernel(int width) {
 		assert (width%2 == 1); // odd
-		double[][] kernel = new double[width][width];
+		float[][] kernel = new float[width][width];
 
-		kernel[width/2][width/2] = 1.0; 
+		kernel[width/2][width/2] = 1; 
 		
 		return kernel;
 	}
@@ -254,8 +254,8 @@ public class ConvolveLib {
 		return filter;
 	}
 	
-	public static double[][] normalizeKernel(double[][] kernel) {
-		double areaUnderCurve = ConvolveLib.integrate(kernel);
+	public static float[][] normalizeKernel(float[][] kernel) {
+		float areaUnderCurve = ConvolveLib.integrate(kernel);
 		
 		for (int i = 0; i < kernel.length; i++) {
 			for (int j = 0; j < kernel[0].length; j++) {
@@ -266,13 +266,12 @@ public class ConvolveLib {
 		return kernel;
 	}
 
-	
 	/* private methods */
 	
 	/* generic helpers for creating kernels */
 	
-	private static double integrate(double[][] kernel) {
-		double result = 0;
+	private static float integrate(float[][] kernel) {
+		float result = 0;
 		
 		for (int i = 0; i < kernel.length; i++) {
 			for (int j = 0; j < kernel[0].length; j++) {
@@ -285,12 +284,12 @@ public class ConvolveLib {
 	
 	/* helper for getGaussKernel */
 	
-	private static double gauss2D(int x, int y, double sigma) {
-		double var = sigma * sigma;             // sigma squared
-		double a = 1.0/(sigma*Math.sqrt(2*Math.PI));  // coefficient
-		double exp = (double)(x*x)/(2.0 * var) + 
-					 (double)(y*y)/(2.0 * var);  // exponent
+	private static float gauss2D(int x, int y, float sigma) {
+		float var = sigma * sigma;             // sigma squared
+		float a = 1/(sigma*(float)Math.sqrt(2*Math.PI));  // coefficient
+		float exp = (float)(x*x)/(2 * var) + 
+					 (float)(y*y)/(2 * var);  // exponent
 		
-		return a * Math.pow(Math.E, - exp);
+		return a * (float)Math.pow(Math.E, - exp);
 	}
 }

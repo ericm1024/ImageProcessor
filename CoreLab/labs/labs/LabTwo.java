@@ -21,7 +21,7 @@ public class LabTwo {
 		File outputFile = new File(WORK_DIR+"img1.png");
 		proc.readWorkingImage(baseFile);
 		
-		proc.resize(0.75, 1.5);
+		proc.resize(0.75f, 1.5f);
 		proc.writeWorkingImage(outputFile);
 	}
 	
@@ -29,7 +29,7 @@ public class LabTwo {
 		File outputFile = new File(WORK_DIR+"img2.png");
 		proc.readWorkingImage(baseFile);
 		
-		proc.rotate(Math.PI/6);
+		proc.rotate((float)Math.PI/6f);
 		proc.writeWorkingImage(outputFile);
 	}
 	
@@ -37,7 +37,7 @@ public class LabTwo {
 		File outputFile = new File(WORK_DIR+"img3.png");
 		proc.readWorkingImage(baseFile);
 		
-		proc.rotate(-Math.PI/6);
+		proc.rotate(-(float)Math.PI/6f);
 		proc.writeWorkingImage(outputFile);
 	}
 	

@@ -59,8 +59,8 @@ public class LabFive {
 	}
 	
 	
-	private static double[] problemTwoHistogram() {
-		double[] histogram = new double[ImageProcessor.NUM_COLORS];
+	private static float[] problemTwoHistogram() {
+		float[] histogram = new float[ImageProcessor.NUM_COLORS];
 		
 		for (int i = 0; i < histogram.length; i++) {
 			if (i < ImageProcessor.NUM_COLORS/2) {
@@ -74,8 +74,8 @@ public class LabFive {
 	}
 	
 	
-	private static double[] problemThreeHistogram() {
-		double[] histogram = new double[ImageProcessor.NUM_COLORS];
+	private static float[] problemThreeHistogram() {
+		float[] histogram = new float[ImageProcessor.NUM_COLORS];
 		
 		for (int i = 0; i < histogram.length; i++) {
 			if (i < ImageProcessor.NUM_COLORS/2) {
