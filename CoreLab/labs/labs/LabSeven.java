@@ -1,5 +1,6 @@
 package labs;
-import iproc.ConvolutionProcessor;
+
+import iproc.ImageProcessor;
 import iproc.ConvolveLib;
 
 import java.io.File;
@@ -9,8 +10,7 @@ public class LabSeven {
 	public static String WORK_DIR = "/Users/eric/Desktop/mudd_fall2014/lab/7/";
 	public static File baseFile = new File(WORK_DIR+"noisy_taxi.png");
 	
-	private static ConvolutionProcessor proc7 = new ConvolutionProcessor();
-	
+	private static ImageProcessor proc7 = new ImageProcessor();
 	
 	public static void main(String args[]) {
 		problemOne();

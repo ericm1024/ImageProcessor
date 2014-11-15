@@ -1,6 +1,6 @@
 package labs;
 
-import iproc.ConvolutionProcessor;
+import iproc.ImageProcessor;
 import iproc.ConvolveLib;
 
 import java.awt.image.BufferedImage;
@@ -11,7 +11,7 @@ public class LabNine {
 	public static String WORK_DIR = "/Users/eric/Desktop/mudd_fall2014/lab/9/";
 	public static String OUT_DIR = WORK_DIR+"out/";
 	
-	private static ConvolutionProcessor cproc = new ConvolutionProcessor();
+	private static ImageProcessor cproc = new ImageProcessor();
 	
 	private static File GUMBY = new File(WORK_DIR+"gumby.png");
 	private static File LENNA = new File(WORK_DIR+"lenna.png");

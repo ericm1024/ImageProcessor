@@ -1,19 +1,17 @@
 package labs;
 
 import iproc.ImageProcessor;
-import iproc.HistogramProcessor;
 
 import java.io.File;
-
 
 public class LabFour {
 	public static String WORK_DIR = "/Users/eric/Desktop/mudd_fall2014/lab/4/";
 	public static File baseFile = new File(WORK_DIR+"LennaG.png");
 	
-	private static LabFourProcessor proc4 = new LabFourProcessor();
+	private static ImageProcessor proc4 = new ImageProcessor();
 	
 	// for histogram functions
-	private static HistogramProcessor procH = new HistogramProcessor();
+	private static ImageProcessor procH = new ImageProcessor();
 	
 	public static void main(String args[]) {
 		problemOne();

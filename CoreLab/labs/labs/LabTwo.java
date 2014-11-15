@@ -1,12 +1,15 @@
 package labs;
+
+import iproc.ImageProcessor;
+
 import java.io.File;
 
-public class labTwo {
+public class LabTwo {
 	
 	public static String WORK_DIR = "/Users/eric/Desktop/mudd_fall2014/lab/2/";
 	public static File baseFile = new File(WORK_DIR+"haswell-e-die-shot.jpg");
 	
-	private static LabTwoProcessor proc = new LabTwoProcessor();
+	private static ImageProcessor proc = new ImageProcessor();
 	
 	public static void main(String args[]) {
 		problemOne();

@@ -8,7 +8,7 @@ public class LabThree {
 	public static String WORK_DIR = "/Users/eric/Desktop/mudd_fall2014/lab/3/";
 	public static File baseFile = new File(WORK_DIR+"Paolina1.png");
 	
-	private static LabThreeProcessor proc = new LabThreeProcessor();
+	private static ImageProcessor proc = new ImageProcessor();
 	
 	public static void main(String args[]) {
 		problemOne();

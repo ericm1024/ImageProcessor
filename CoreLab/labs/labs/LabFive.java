@@ -1,17 +1,15 @@
 package labs;
 
 import iproc.ImageProcessor;
-import iproc.HistogramProcessor;
 
 import java.io.File;
-
 
 public class LabFive {
 	public static String WORK_DIR = "/Users/eric/Desktop/mudd_fall2014/lab/5/";
 	public static File baseFile = new File(WORK_DIR+"LennaG.png");
 	
-	private static LabFiveProcessor proc5 = new LabFiveProcessor();
-	private static HistogramProcessor procH = new HistogramProcessor();
+	private static ImageProcessor proc5 = new ImageProcessor();
+	private static ImageProcessor procH = new ImageProcessor();
 	
 	public static void main(String args[]) {
 		problemOne();
@@ -71,7 +69,7 @@ public class LabFive {
 				histogram[i] = ImageProcessor.NUM_COLORS - i;
 			}
 		}
-		LabFiveProcessor.normalize(histogram);
+		ImageProcessor.normalize(histogram);
 		return histogram;
 	}
 	
@@ -86,7 +84,7 @@ public class LabFive {
 				histogram[i] = i - ImageProcessor.NUM_COLORS/2;
 			}
 		}
-		LabFiveProcessor.normalize(histogram);
+		ImageProcessor.normalize(histogram);
 		return histogram;
 	}
 }
