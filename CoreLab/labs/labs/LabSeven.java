@@ -43,7 +43,7 @@ public class LabSeven {
 		File outputFile1 = new File(WORK_DIR+"cross-median-filter-side="+side+",thickness="+thickness+".png");
 		
 		proc7.readWorkingImage(baseFile);
-		proc7.filterImage(ConvolveLib.getCrossFilter(side, thickness));
+		proc7.medianFilter(ConvolveLib.getCrossFilter(side, thickness));
 		proc7.writeWorkingImage(outputFile1);
 	}
 	
@@ -55,7 +55,7 @@ public class LabSeven {
 		
 		File outputFile1 = new File(WORK_DIR+"best-cleanup.png");
 		proc7.readWorkingImage(baseFile);
-		proc7.filterImage(ConvolveLib.getCrossFilter(side, thickness));
+		proc7.medianFilter(ConvolveLib.getCrossFilter(side, thickness));
 		proc7.convolve(ConvolveLib.getGaussKernel(gaussSize, numSigma));
 		proc7.writeWorkingImage(outputFile1);
 	}

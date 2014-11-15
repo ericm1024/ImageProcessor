@@ -25,7 +25,7 @@ public class LabThree {
 		
 		proc.readWorkingImage(baseFile);
 		proc.writeWorkingImage(outputFile1);	
-		ImageProcessor.writeImage(proc.greyHisto(), outputFile2);
+		ImageProcessor.writeImage(proc.histogramGrey(), outputFile2);
 	}
 	
 	
@@ -63,7 +63,7 @@ public class LabThree {
 		
 		proc.makeGreyscale();
 		proc.writeWorkingImage(outputFile1);	
-		ImageProcessor.writeImage(proc.greyHisto(), outputFile2);
+		ImageProcessor.writeImage(proc.histogramGrey(), outputFile2);
 		
 		ImageProcessor.writeImage(proc.stretchCutoff(cutoffPercent), outputFile3);
 		ImageProcessor.writeImage(proc.cutoffHisto(cutoffPercent), outputFile4);

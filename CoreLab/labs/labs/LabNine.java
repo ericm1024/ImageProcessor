@@ -62,7 +62,7 @@ public class LabNine {
 		
 		cproc.readWorkingImage(starter);
 		cproc.convolve(gauss);
-		cproc.filterImage(filter);
+		cproc.medianFilter(filter);
 		cproc.convolve(laplace1);
 		cproc.writeWorkingImage(out);
 	}
