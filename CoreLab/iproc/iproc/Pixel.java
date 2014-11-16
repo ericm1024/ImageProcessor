@@ -91,6 +91,25 @@ public class Pixel {
 				/3);
 	}
 	
+	public float getRedFloat() {
+		return pixel_.getColorFloat(RawPixel.ColorField.RED);
+	}
+	
+	public float getGreenFloat() {
+		return pixel_.getColorFloat(RawPixel.ColorField.GREEN);
+	}
+	
+	public float getBlueFloat() {
+		return pixel_.getColorFloat(RawPixel.ColorField.BLUE);
+	}
+	
+	public float getGreyFloat() {
+		return (pixel_.getColorFloat(RawPixel.ColorField.RED)
+				+ pixel_.getColorFloat(RawPixel.ColorField.GREEN)
+				+ pixel_.getColorFloat(RawPixel.ColorField.BLUE)
+				/3f);
+	}
+	
 	public void greyscale() {
 		int grey = getGrey();
 		pixel_.setColorAll(grey, grey, grey, 
@@ -114,6 +133,27 @@ public class Pixel {
 	}
 	
 	public void setGrey(int grey) {
+		pixel_.setColorAll(grey, grey, grey,
+			pixel_.getColorInt(RawPixel.ColorField.ALPHA));
+		updateImage();
+	}
+	
+	public void setRed(float red) {
+		pixel_.setColor(RawPixel.ColorField.RED, red);
+		updateImage();
+	}
+	
+	public void setGreen(float green) {
+		pixel_.setColor(RawPixel.ColorField.RED, green);
+		updateImage();
+	}
+	
+	public void setBlue(float blue) {
+		pixel_.setColor(RawPixel.ColorField.RED, blue);
+		updateImage();
+	}
+	
+	public void setGrey(float grey) {
 		pixel_.setColorAll(grey, grey, grey,
 			pixel_.getColorInt(RawPixel.ColorField.ALPHA));
 		updateImage();

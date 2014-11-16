@@ -127,10 +127,9 @@ public class ImageProcessor {
 	 * @return returns the local workingImage.
 	 */
 	public BufferedImage getImage() {
-		// TODO: should this function return a copy?
+		// TODO: should this function return a copy? (yes)
 		return workingImage_;
 	}
-	
 	
 	/**
 	 * @return returns the local workingImage.
@@ -139,7 +138,6 @@ public class ImageProcessor {
 		workingImage_ = image;
 		imageType_ = workingImage_.getType();
 	}
-	
 	
 	/**
 	 * @return A BufferedImage with the name dimensions and type as
@@ -150,6 +148,10 @@ public class ImageProcessor {
 				workingImage_.getHeight(), workingImage_.getType());
 	}
 	
+	/**
+	 * TODO: make this a complete deep copy. Needs investigation
+	 * @return a (sort of) deep copy of the working image.
+	 */
 	public BufferedImage deepCopy() {
 		 ColorModel cm = workingImage_.getColorModel();
 		 boolean isAlphaPremultiplied = workingImage_.isAlphaPremultiplied();
@@ -158,7 +160,7 @@ public class ImageProcessor {
 		 return new BufferedImage(cm, raster, isAlphaPremultiplied, null)
 		 	.getSubimage(0, 0, workingImage_.getWidth(),
 		 		workingImage_.getHeight());
-		}
+	}
 	
 	private class PixelIterator implements Iterator<Pixel> {
 
@@ -202,12 +204,20 @@ public class ImageProcessor {
         }
     }
 
+	/**
+	 * Returns an iterator that iterates over the pixels in the image
+	 */
     public Iterator<Pixel> iterator() {
         return new PixelIterator(workingImage_);
     }
     
     /* convolution ops */
     
+    /**
+     * Convolves the working image with the given kernel. Overwrites the
+     * working image with the new image
+     * @param kernel : the kernel to convolve with
+     */
     public void convolve(float[][] kernel) {
 		BufferedImage result = blankCopy();
 
@@ -222,7 +232,11 @@ public class ImageProcessor {
 		workingImage_ = result;
 	}
 	
-	public void filterImage(Boolean[][] filter) {
+    /**
+     * Applies a median filter to the image.
+     * @param filter : the filter to use
+     */
+	public void medianFilter(Boolean[][] filter) {
 		BufferedImage result = blankCopy();
 
 		Iterator<Pixel> itter = iterator();
@@ -255,6 +269,12 @@ public class ImageProcessor {
 		return result;
 	}
 	
+	/**
+	 * Gets the gradient of the image by convolving with x and y gradient
+	 * operators.
+	 * @param xKernel : the x gradient operator
+	 * @param yKernel : the y gradient operator
+	 */
 	public void gradient(float[][] xKernel, float[][] yKernel) {
 		float[][] greyscale = getGreyscale();
 		float[][] magnitude = new float[greyscale.length][greyscale[0].length];
@@ -274,11 +294,9 @@ public class ImageProcessor {
 	/* convolution helpers */
 		
 	private void convolveOnce(float[][] kernel, Pixel outputPixel) {
-		float weight = 0;
 		float redSum = 0;
 		float greenSum = 0;
 		float blueSum = 0;
-		
 		Pixel workingPixel = new Pixel(workingImage_, outputPixel.getX(),
 											outputPixel.getY());
 		
@@ -292,22 +310,16 @@ public class ImageProcessor {
 					continue;
 				}
 				workingPixel.moveTo(xIndex, yIndex);
-				weight = kernel[kernelX][kernelY];
+				float weight = kernel[kernelX][kernelY];
 				
-				RawPixel pixel = workingPixel.get();
-				
-				redSum += weight * pixel.getColorFloat(ColorField.RED);
-				greenSum += weight * pixel.getColorFloat(ColorField.GREEN);
-				blueSum += weight * pixel.getColorFloat(ColorField.BLUE);
+				redSum += weight * workingPixel.getRedFloat();
+				greenSum += weight * workingPixel.getGreenFloat();
+				blueSum += weight * workingPixel.getBlueFloat();
 			}
 		}
-		RawPixel output = new RawPixel(RawPixel.Mode.FLOAT);
-		
-		output.setColor(ColorField.RED, redSum);
-		output.setColor(ColorField.GREEN, greenSum);
-		output.setColor(ColorField.BLUE, blueSum);
-		
-		outputPixel.set(output);
+		outputPixel.setRed(redSum);
+		outputPixel.setGreen(greenSum);
+		outputPixel.setBlue(blueSum);
 	}
 	
 	private void medianFilterOnce(Boolean[][] filter, Pixel outputPixel) {
@@ -389,92 +401,72 @@ public class ImageProcessor {
 	}
 	
 	/* colorspace ops */
+	
 	/* public functions */
 	
 	public void rotateHue(float Theta) {
-		Pixel localP;
-		RGB rgb = new RGB();
-		HSI hsi = new HSI();
-		
-		for (int x = 0; x < workingImage_.getWidth(); x++) {
-			for (int y = 0; y < workingImage_.getHeight(); y++) {
-				localP = new Pixel(workingImage_, x, y);
-				RawPixel localRaw = localP.get();
-
-				// get HSI values
-				hsi = RGBtoHSI(localRaw.getColorFloat(RawPixel.ColorField.RED),
-							   localRaw.getColorFloat(RawPixel.ColorField.GREEN),
-							   localRaw.getColorFloat(RawPixel.ColorField.BLUE));
-				
-				// rotate the hue
-				hsi.h = getEquivClass(hsi.h + Theta);
-				
-				// transform hsi values back to rgb
-				rgb = HSItoRGB(hsi.h, hsi.s, hsi.i);
-				
-				// update the pixel with the new rgb value
-				localRaw.setColorAll(rgb.r, rgb.g, rgb.b, 1);
-				localP.set(localRaw);
-			}
+		Iterator<Pixel> iter = iterator();
+		while (iter.hasNext()) {
+			Pixel pix = iter.next();
+			
+			// get HSI values
+			HSI hsi = RGBtoHSI(pix.getRedFloat(), pix.getGreenFloat(),
+					pix.getBlueFloat());
+			
+			// rotate the hue
+			hsi.h = getEquivClass(hsi.h + Theta);
+			
+			// transform hsi values back to rgb
+			RGB rgb = HSItoRGB(hsi.h, hsi.s, hsi.i);
+			
+			pix.setRed(rgb.r);
+			pix.setGreen(rgb.g);
+			pix.setBlue(rgb.b);
 		}
 	}
 	
-	
-	public void increaseSaturation(float deltaS) {
-		Pixel localP;
-		RGB rgb = new RGB();
-		HSI hsi = new HSI();
-		
-		for (int x = 0; x < workingImage_.getWidth(); x++) {
-			for (int y = 0; y < workingImage_.getHeight(); y++) {
-				localP = new Pixel(workingImage_, x, y);
-				RawPixel localRaw = localP.get();
+	public void increaseSaturation(float deltaS) {		
+		Iterator<Pixel> iter = iterator();
+		while (iter.hasNext()) {
+			Pixel pix = iter.next();
+			
+			// get HSI values
+			HSI hsi = RGBtoHSI(pix.getRedFloat(), pix.getGreenFloat(),
+					pix.getBlueFloat());
+			
+			// modify the saturation
+			hsi.s = hsi.s + deltaS;
 
-				// get HSI values
-				hsi = RGBtoHSI(localRaw.getColorFloat(RawPixel.ColorField.RED),
-							   localRaw.getColorFloat(RawPixel.ColorField.GREEN),
-							   localRaw.getColorFloat(RawPixel.ColorField.BLUE));
-				
-				// modify the saturation
-				hsi.s = hsi.s + deltaS;
-				
-				// transform hsi values back to rgb
-				rgb = HSItoRGB(hsi.h, hsi.s, hsi.i);
-				
-				// update the pixel with the new rgb value
-				localRaw.setColorAll(rgb.r, rgb.g, rgb.b, 1);			
-				localP.set(localRaw);
-			}
+			// transform hsi values back to rgb
+			RGB rgb = HSItoRGB(hsi.h, hsi.s, hsi.i);
+			
+			pix.setRed(rgb.r);
+			pix.setGreen(rgb.g);
+			pix.setBlue(rgb.b);
 		}
 	}
-	
 	
 	public void stretchIntensity() {
-		Pixel localP;
-		RGB rgb = new RGB();
-		HSI hsi = new HSI();
 		float minI = getMinI();
 		float maxI = getMaxI();
 		
-		for (int x = 0; x < workingImage_.getWidth(); x++) {
-			for (int y = 0; y < workingImage_.getHeight(); y++) {
-				localP = new Pixel(workingImage_, x, y);
-				RawPixel localRaw = localP.get();
+		Iterator<Pixel> iter = iterator();
+		while (iter.hasNext()) {
+			Pixel pix = iter.next();
+			
+			// get HSI values
+			HSI hsi = RGBtoHSI(pix.getRedFloat(), pix.getGreenFloat(),
+					pix.getBlueFloat());
+			
+			// stretch the intensity
+			hsi.i = (hsi.i - minI)/(maxI - minI);
 
-				// get HSI values
-				hsi = RGBtoHSI(localRaw.getColorFloat(RawPixel.ColorField.RED),
-							   localRaw.getColorFloat(RawPixel.ColorField.GREEN),
-							   localRaw.getColorFloat(RawPixel.ColorField.BLUE));
-				
-				hsi.i = (hsi.i - minI)/(maxI - minI);
-				
-				// transform hsi values back to rgb
-				rgb = HSItoRGB(hsi.h, hsi.s, hsi.i);
-				
-				// update the pixel with the new rgb value
-				localRaw.setColorAll(rgb.r, rgb.g, rgb.b, 1);
-				localP.set(localRaw);
-			}
+			// transform hsi values back to rgb
+			RGB rgb = HSItoRGB(hsi.h, hsi.s, hsi.i);
+			
+			pix.setRed(rgb.r);
+			pix.setGreen(rgb.g);
+			pix.setBlue(rgb.b);
 		}
 	}
 	
@@ -503,18 +495,11 @@ public class ImageProcessor {
 		Iterator<Pixel> pixItter = iterator();
 		while (pixItter.hasNext()) {
 			Pixel pix = pixItter.next();
-			RawPixel rawPix = pix.get();
 			
-			rgb[0][pix.getX()][pix.getY()] =
-					rawPix.getColorFloat(RawPixel.ColorField.RED);
-			
-			rgb[1][pix.getX()][pix.getY()] =
-					rawPix.getColorFloat(RawPixel.ColorField.GREEN);
-			
-			rgb[2][pix.getX()][pix.getY()] =
-					rawPix.getColorFloat(RawPixel.ColorField.BLUE);
-		}
-		
+			rgb[0][pix.getX()][pix.getY()] = pix.getRedFloat();			
+			rgb[1][pix.getX()][pix.getY()] = pix.getGreenFloat();
+			rgb[2][pix.getX()][pix.getY()] = pix.getBlueFloat();
+		}	
 		return rgb;
 	}
 	
@@ -525,13 +510,7 @@ public class ImageProcessor {
 		Iterator<Pixel> pixItter = iterator();
 		while (pixItter.hasNext()) {
 			Pixel pix = pixItter.next();
-			RawPixel rawPix = pix.get();
-			
-			greyscale[pix.getX()][pix.getY()] = (
-					( rawPix.getColorFloat(RawPixel.ColorField.RED)
-					+ rawPix.getColorFloat(RawPixel.ColorField.GREEN)
-					+ rawPix.getColorFloat(RawPixel.ColorField.BLUE)
-					) / 3F);
+			greyscale[pix.getX()][pix.getY()] = pix.getGreyFloat();
 		}		
 		return greyscale;
 	}
@@ -540,31 +519,21 @@ public class ImageProcessor {
 		Iterator<Pixel> pixItter = iterator();
 		while (pixItter.hasNext()) {
 			Pixel pix = pixItter.next();
-			RawPixel rawPix = pix.get();
 			int x = pix.getX();
 			int y = pix.getY();
 			
-			rawPix.setColor(RawPixel.ColorField.RED, rgb[0][x][y]);
-			rawPix.setColor(RawPixel.ColorField.GREEN, rgb[1][x][y]);
-			rawPix.setColor(RawPixel.ColorField.BLUE, rgb[2][x][y]);
-			
-			pix.set(rawPix);
+			pix.setRed(rgb[0][x][y]);
+			pix.setGreen(rgb[1][x][y]);
+			pix.setBlue(rgb[2][x][y]);
 		}
 	}
 	
 	public void setFromGreyscale(float[][] greyscale) {
 		Iterator<Pixel> pixItter = iterator();
+		
 		while (pixItter.hasNext()) {
 			Pixel pix = pixItter.next();
-			RawPixel rawPix = pix.get();
-			int x = pix.getX();
-			int y = pix.getY();
-			
-			rawPix.setColor(RawPixel.ColorField.RED, greyscale[x][y]);
-			rawPix.setColor(RawPixel.ColorField.GREEN, greyscale[x][y]);
-			rawPix.setColor(RawPixel.ColorField.BLUE, greyscale[x][y]);
-			
-			pix.set(rawPix);
+			pix.setGrey(greyscale[pix.getX()][pix.getY()]);
 		}
 	}
 	
@@ -572,17 +541,14 @@ public class ImageProcessor {
 		Iterator<Pixel> pixItter = iterator();
 		while (pixItter.hasNext()) {
 			Pixel pix = pixItter.next();
-			RawPixel rawPix = pix.get();
 			int x = pix.getX();
 			int y = pix.getY();
 			
 			RGB localRgb = HSItoRGB(hsi[0][x][y], hsi[1][x][y], hsi[2][x][y]);
 			
-			rawPix.setColor(RawPixel.ColorField.RED, localRgb.r);
-			rawPix.setColor(RawPixel.ColorField.GREEN, localRgb.g);
-			rawPix.setColor(RawPixel.ColorField.BLUE, localRgb.b);
-			
-			pix.set(rawPix);
+			pix.setRed(localRgb.r);
+			pix.setGreen(localRgb.g);
+			pix.setBlue(localRgb.b);
 		}
 	}
 	
@@ -695,46 +661,35 @@ public class ImageProcessor {
 	
 	private float getMinI() {
 		float min = Float.POSITIVE_INFINITY;
-		Pixel localP;
-		HSI hsi = new HSI();
 		
-		for (int x = 0; x < workingImage_.getWidth(); x++) {
-			for (int y = 0; y < workingImage_.getHeight(); y++) {
-				localP = new Pixel(workingImage_, x, y);
-				RawPixel localRaw = localP.get();
-
-				// get HSI values
-				hsi = RGBtoHSI(localRaw.getColorFloat(RawPixel.ColorField.RED),
-							   localRaw.getColorFloat(RawPixel.ColorField.GREEN),
-							   localRaw.getColorFloat(RawPixel.ColorField.BLUE));
-				
-				if (hsi.i < min) {
-					min = hsi.i;
-				}
+		Iterator<Pixel> iter = iterator();
+		while (iter.hasNext()) {
+			Pixel pix = iter.next();
+			
+			// get HSI values
+			HSI hsi = RGBtoHSI(pix.getRedFloat(), pix.getGreenFloat(), 
+					pix.getBlueFloat());
+			
+			if (hsi.i < min) {
+				min = hsi.i;
 			}
 		}
-		
 		return min;
 	}
 	
 	private float getMaxI() {
 		float max = Float.NEGATIVE_INFINITY;
-		Pixel localP;
-		HSI hsi = new HSI();
 		
-		for (int x = 0; x < workingImage_.getWidth(); x++) {
-			for (int y = 0; y < workingImage_.getHeight(); y++) {
-				localP = new Pixel(workingImage_, x, y);
-				RawPixel localRaw = localP.get();
-
-				// get HSI values
-				hsi = RGBtoHSI(localRaw.getColorFloat(RawPixel.ColorField.RED),
-						   localRaw.getColorFloat(RawPixel.ColorField.GREEN),
-						   localRaw.getColorFloat(RawPixel.ColorField.BLUE));
-				
-				if (hsi.i > max) {
-					max = hsi.i;
-				}
+		Iterator<Pixel> iter = iterator();
+		while (iter.hasNext()) {
+			Pixel pix = iter.next();
+			
+			// get HSI values
+			HSI hsi = RGBtoHSI(pix.getRedFloat(), pix.getGreenFloat(), 
+					pix.getBlueFloat());
+			
+			if (hsi.i > max) {
+				max = hsi.i;
 			}
 		}
 		return max;
@@ -772,12 +727,6 @@ public class ImageProcessor {
 			g = green;
 			b = blue;
 		}
-		
-		public RGB() {
-			r = 0;
-			g = 0;
-			b = 0;
-		}
 	}
 	
 	private class HSI {
@@ -789,12 +738,6 @@ public class ImageProcessor {
 			h = hue;
 			s = sat;
 			i = intensity;
-		}
-		
-		public HSI() {
-			h = 0;
-			s = 0;
-			i = 0;
 		}
 	}
 	
@@ -930,7 +873,6 @@ public class ImageProcessor {
 			}
 			
 		}
-		
 		return histogram;
 	}
 	
@@ -946,7 +888,6 @@ public class ImageProcessor {
 		while (colorItter.hasNext()) {
 			colors.put(colorItter.next(), new int[NUM_COLORS]);
 		}
-		
 		return colors;
 	}
 	
@@ -1125,25 +1066,15 @@ public class ImageProcessor {
 	
 	/* lab 3 public functions */
 	
-	public BufferedImage greyHisto() {
-		int[] colorCounts = countColorsGreyscale();
-		float pixelWeight = ((float)NUM_COLORS)/arrayMax(colorCounts);
-		normalizeColorCounts(colorCounts, pixelWeight);
-		
-		return histogramFromArray(colorCounts);
-	}
-	
-	
 	public BufferedImage stretchedGreyHisto() {
 		int[] colorCounts = countColorsGreyscale();
-		int[] stretchedColorCounts;
 		float pixelWeight = ((float)NUM_COLORS)/arrayMax(colorCounts);
 		normalizeColorCounts(colorCounts, pixelWeight);
 		
 		int minIndex = firstNonZeroIndex(colorCounts);
 		int maxIndex = lastNonZeroIndex(colorCounts);
 		
-		stretchedColorCounts = stretchArray(colorCounts, minIndex, maxIndex);
+		int[] stretchedColorCounts = stretchArray(colorCounts, minIndex, maxIndex);
 		
 		return histogramFromArray(stretchedColorCounts);
 	}
@@ -1252,8 +1183,7 @@ public class ImageProcessor {
 					localPixel.setGrey(RawPixel.INT_COLOR_MAX);;
 				}
 			}
-		}
-				
+		}		
 		return histogram;
 	}
 	
@@ -1422,12 +1352,11 @@ public class ImageProcessor {
 	
 	public static void normalize(float[] array) {
 		float volume = 0;
-		float normalFactor;
 		for (int i = 0; i < array.length; i++) {
 			volume += array[i];
 		}
 		
-		normalFactor = 1f/volume;
+		float normalFactor = 1f/volume;
 		
 		for (int i = 0; i < array.length; i++) {
 			array[i] *= normalFactor;
@@ -1443,11 +1372,7 @@ public class ImageProcessor {
 
 		Iterator<Pixel> pixItter = iterator();
 		while (pixItter.hasNext()) {
-			RawPixel next = pixItter.next().get();
-			int localShade = (next.getColorInt(RawPixel.ColorField.RED)
-							+ next.getColorInt(RawPixel.ColorField.GREEN)
-							+ next.getColorInt(RawPixel.ColorField.BLUE)
-							) / 3;
+			int localShade = pixItter.next().getGrey();
 			histogram[localShade] += pixelWeight;
 		}
 		return histogram;
@@ -1469,41 +1394,26 @@ public class ImageProcessor {
 	private BufferedImage mapLookup(float[] lookupTable) {
 		BufferedImage output = blankCopy();
 		
-		Iterator<Pixel> pixItter = iterator();
-		while(pixItter.hasNext()) {
-			Pixel pix = pixItter.next();
-			RawPixel rawPix = pix.get();
-			int localShade = (rawPix.getColorInt(RawPixel.ColorField.RED)
-							+ rawPix.getColorInt(RawPixel.ColorField.GREEN)
-							+ rawPix.getColorInt(RawPixel.ColorField.BLUE)
-							) / 3;
-			RawPixel result = new RawPixel();
-			result.setColorAll((int)lookupTable[localShade], 
-					(int)lookupTable[localShade], (int)lookupTable[localShade],
-					RawPixel.INT_COLOR_MAX);
-			pix.set(result);
+		Iterator<Pixel> iter = iterator();
+		while(iter.hasNext()) {
+			Pixel pix = iter.next();
+			int localShade = pix.getGrey();
+			Pixel result = new Pixel(output, pix.getX(), pix.getY());
+			result.setGrey((int)lookupTable[localShade]);
 		}
-		
 		return output;
 	}
 	
 	private BufferedImage mapLookup(int[] lookupTable) {
 		BufferedImage output = blankCopy();
 		
-		Iterator<Pixel> pixItter = iterator();
-		while(pixItter.hasNext()) {
-			Pixel pix = pixItter.next();
-			RawPixel rawPix = pix.get();
-			int localShade = (rawPix.getColorInt(RawPixel.ColorField.RED)
-							+ rawPix.getColorInt(RawPixel.ColorField.GREEN)
-							+ rawPix.getColorInt(RawPixel.ColorField.BLUE)
-							) / 3;
-			RawPixel result = new RawPixel();
-			result.setColorAll(lookupTable[localShade], 
-					lookupTable[localShade], lookupTable[localShade],
-					RawPixel.INT_COLOR_MAX);
-			pix.set(result);
-		}	
+		Iterator<Pixel> iter = iterator();
+		while(iter.hasNext()) {
+			Pixel pix = iter.next();
+			int localShade = pix.getGrey();
+			Pixel result = new Pixel(output, pix.getX(), pix.getY());
+			result.setGrey(lookupTable[localShade]);
+		}
 		return output;
 	}
 	
@@ -1520,7 +1430,6 @@ public class ImageProcessor {
 		for (int i = 0; i < maping.length; i++) {
 			maping[i] = closestIndex(outputLT, inputLT[i]);
 		}
-
 		return maping;
 	}
 	

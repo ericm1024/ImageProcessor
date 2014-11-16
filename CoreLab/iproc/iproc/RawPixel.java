@@ -65,8 +65,8 @@ public class RawPixel {
 	 * copy constructor 
 	 */
 	public RawPixel(RawPixel other) {
-		RawPixel copy = new RawPixel(mode_);
-		copy.setColorRgb(getColorRgb());
+		this.mode_ = other.mode_;
+		this.setColorRgb(other.getColorRgb());
 	}
 	
 	/**
