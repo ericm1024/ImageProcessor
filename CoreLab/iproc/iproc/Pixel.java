@@ -49,6 +49,15 @@ public class Pixel {
 		return y_;
 	}
 	
+	/**
+	 * To uniquely identify the parent image without having to pass it
+	 * arround.
+	 * @return the hash of the parent image
+	 */
+	public int getParentHash() {
+		return parent_.hashCode();
+	}
+	
 	public void set(RawPixel pixel) {
 		pixel_ = pixel;
 		updateImage();
@@ -123,12 +132,12 @@ public class Pixel {
 	}
 	
 	public void setGreen(int green) {
-		pixel_.setColor(RawPixel.ColorField.RED, green);
+		pixel_.setColor(RawPixel.ColorField.GREEN, green);
 		updateImage();
 	}
 	
 	public void setBlue(int blue) {
-		pixel_.setColor(RawPixel.ColorField.RED, blue);
+		pixel_.setColor(RawPixel.ColorField.BLUE, blue);
 		updateImage();
 	}
 	
@@ -144,12 +153,12 @@ public class Pixel {
 	}
 	
 	public void setGreen(float green) {
-		pixel_.setColor(RawPixel.ColorField.RED, green);
+		pixel_.setColor(RawPixel.ColorField.GREEN, green);
 		updateImage();
 	}
 	
 	public void setBlue(float blue) {
-		pixel_.setColor(RawPixel.ColorField.RED, blue);
+		pixel_.setColor(RawPixel.ColorField.BLUE, blue);
 		updateImage();
 	}
 	
