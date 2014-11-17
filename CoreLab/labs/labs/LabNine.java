@@ -3,9 +3,11 @@ package labs;
 import iproc.ConvolveLib;
 import iproc.ImageProcessor;
 import iproc.Pixel;
+import iproc.RawPixel;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Iterator;
 
 @SuppressWarnings("unused")
@@ -21,71 +23,47 @@ public class LabNine {
 	private static File FUZZY_EDGE = new File(WORK_DIR+"fuzzy_edge.png");
 	
 	public static void main(String args[]) {
-		laplaceOfGauss(PANDA, "panda");
+		//laplaceOfGauss(PANDA, "panda");
+		//laplace(PANDA, "panda");
+		canny(PANDA, "panda");
 	}
 	
 	private static void laplace(File starter, final String name) {
 		File out1 = new File(OUT_DIR+name+"-laplace-1.png");
 		File out2 = new File(OUT_DIR+name+"-laplace-2.png");
 		
-		float[][] laplace1 = ConvolveLib.KERNEL_LAB9_LAPLACE_1;
-		float[][] laplace2 = ConvolveLib.KERNEL_LAB9_LAPLACE_2;
+		float[][] laplace = ConvolveLib.KERNEL_LAB9_LAPLACE_1;
+		
+		float thresh = 0.05f;
+		int windowSize = 3;
 		
 		cproc.readWorkingImage(starter);
-		cproc.convolve(laplace1);
+		cproc.convolve(laplace);
+		cproc.detectZeroCrossing(thresh, windowSize);
 		cproc.writeWorkingImage(out1);
-		
-		cproc.readWorkingImage(starter);
-		cproc.convolve(laplace2);
-		cproc.writeWorkingImage(out2);
-	}
-	
-	private static void  gauss(File starter, final String name) {
-		int width = 15;
-		float numSigma = 3f;
-		float sigma = ((float)width)/(2*numSigma);
-		float[][] gauss = ConvolveLib.getGaussKernel(width, numSigma);
-		
-		int side = 3;
-		int thickness = 1;
-		Boolean[][] filter = ConvolveLib.getCrossFilter(side, thickness);
-		
-		float[][] laplace1 = ConvolveLib.KERNEL_LAB9_LAPLACE_1;
-		
-		File out = new File(OUT_DIR+name+"-gauss-s="+sigma+"-cross-filter-lap1.png");
-		
-		cproc.readWorkingImage(starter);
-		cproc.convolve(gauss);
-		cproc.medianFilter(filter);
-		cproc.convolve(laplace1);
-		cproc.writeWorkingImage(out);
 	}
 	
 	private static void laplaceOfGauss(File starter, final String name) {
-		int width = 11;
-		float numSigma = 4f;
-		float sigma = ((float)width)/(2*numSigma);
+		int width = 5;
+		float sigma = 3f;
 		
-		File out1 = new File(OUT_DIR+name+"-gauss-s="+sigma+"-laplace1.png");
-		File out2 = new File(OUT_DIR+name+"-gauss-s="+sigma+"-laplace2.png");
-		File out3 = new File(OUT_DIR+name+"-laplace-of-gauss-5x5-given.png");
+		File out1 = new File(OUT_DIR+name+"LoG-step1.png");
+		File out2 = new File(OUT_DIR+name+"LoG-step2.png");
+		File out3 = new File(OUT_DIR+name+"-LoG-step3.png");
 		
-		float[][] gauss = ConvolveLib.getGaussKernel(width, numSigma);
-		/* gaussian kernel specs */
-		float[][] gauss2 = ConvolveLib.KERNEL_LAB9_GAUSS;
-		float[][] laplace1 = ConvolveLib.KERNEL_LAB9_LAPLACE_1;
-		float[][] laplace2 = ConvolveLib.KERNEL_LAB9_LAPLACE_2;
-		float[][] lapOfGauss = ConvolveLib.KERNEL_LAB9_LAPLACE_OF_GAUSS_5;
+		float[][] gauss = ConvolveLib.getGauss(width, sigma);
+		float[][] laplace = ConvolveLib.KERNEL_LAB9_LAPLACE_3;
+		
+		int windowSize = 3;
+		float thresh = 0.08f;
 		
 		cproc.readWorkingImage(starter);
-		cproc.convolve(gauss2);
-		cproc.convolve(laplace1);
+		cproc.convolve(gauss);
 		cproc.writeWorkingImage(out1);
-		
-		cproc.readWorkingImage(starter);
-		cproc.convolve(gauss2);
-		cproc.convolve(laplace2);
+		cproc.convolve(laplace);
 		cproc.writeWorkingImage(out2);
+		cproc.detectZeroCrossing(thresh, windowSize);
+		cproc.writeWorkingImage(out3);
 	}
 	
 	private static void method1(File starter, final String name) {		
@@ -103,8 +81,7 @@ public class LabNine {
 		/* alternate gaussian */
 		int width = 5;
 		float sigma = 2.0f;
-		float numSigma = (float)width/(2*sigma);
-		float[][] gauss2 = ConvolveLib.getGaussKernel(width, numSigma);
+		float[][] gauss2 = ConvolveLib.getGauss(width, sigma);
 		
 		/* gradient operators */
 		float[][] gradientX = ConvolveLib.GRAD_SCHARR_X;
@@ -168,122 +145,79 @@ public class LabNine {
 		cproc.writeWorkingImage(outf5);
 	}
 	
-	
 	/* canny algorithm */
-	private static void method2(File starter, final String name) {
+	private static void canny(File starter, final String name) {
 		File outf1 = new File(OUT_DIR+name+"-m2-step1-gauss.png");
 		File outf2 = new File(OUT_DIR+name+"-m2-step2-grad.png");
 		File outf3 = new File(OUT_DIR+name+"-m2-step3-thresh.png");
-		File outf4 = new File(OUT_DIR+name+"-m2-step4.png");
+		File outf4 = new File(OUT_DIR+name+"-m2-step4-supress.png");
 		File outf5t1 = new File(OUT_DIR+name+"-m2-step5-t1.png");
 		File outf5t2 = new File(OUT_DIR+name+"-m2-step5-t2.png");
 		
 		cproc.readWorkingImage(starter);
 		
-		/* alternate gaussian */
-		int width = 11;
-		float sigma = 2f;
-		float numSigma = (float)width/(2*sigma);
-		float[][] gauss2 = ConvolveLib.getGaussKernel(width, numSigma);
-		
-		/* gradient operators */
-		float[][] gradientX = ConvolveLib.GRAD_SCHARR_X;
-		float[][] gradientY = ConvolveLib.GRAD_SCHARR_Y;
-		
-		/* threshold value (should be between 0 and 1) */
-		float threshold = 0.25f;
-		
 		/* step 1: smooth with a Gaussian kernel */
-		
-		cproc.convolve(gauss2);
+		/* gaussian */
+		int width = 7;
+		float sigma = 2f;
+		float[][] gauss = ConvolveLib.getGauss(width, sigma);
+		cproc.convolve(gauss);
 		cproc.writeWorkingImage(outf1);
 		
 		/* step 2: compute the gradient */
-		
-		ImageProcessor colorProc = new ImageProcessor(cproc.getImage());
-		float[][] greyscale = colorProc.getGreyscale();
-		
-		float[][] xPartial = ImageProcessor
-				.convolveArrayPrimative(gradientX, greyscale);
-		float[][] yPartial = ImageProcessor
-				.convolveArrayPrimative(gradientY, greyscale);
-		
+		float[][] gradientX = ConvolveLib.GRAD_SCHARR_X;
+		float[][] gradientY = ConvolveLib.GRAD_SCHARR_Y;
 		cproc.gradient(gradientX, gradientY);
 		cproc.writeWorkingImage(outf2);
 		
 		/* step 3: threshold by the magnitude of the gradient */
+		/* threshold value (should be between 0 and 1) */
+		float threshold = 0.1f;
+		cproc.threshold(threshold);
+		cproc.writeWorkingImage(outf3);	
 		
-		float[][] greyscaleThreshold = 
-				new float[greyscale.length][greyscale[0].length];
+		/* step 4: supress non-maximum pixels */
+		/* trim the mess off of the edges because convolution sucks */
+		cproc.trim(5);		
+
+		float[][] greyscale = cproc.getGreyscale();
+		float[][] supressed = cproc.getGreyscale();
 		
 		for (int x = 0; x < greyscale.length; x++) {
 			for (int y = 0; y < greyscale[0].length; y++) {
-				float grad = magnitude(xPartial[x][y], yPartial[x][y]);
-				if (grad < threshold) {
-					greyscaleThreshold[x][y] = 0.0f;
-				} else {
-					greyscaleThreshold[x][y] = grad;
-				}
-			}
-		}
-		
-		colorProc.setFromGreyscale(greyscaleThreshold);
-		colorProc.writeWorkingImage(outf3);	
-		
-		/* step 4: supress non-maximum pixels */
-		
-		/* trim the mess off of the edges because convolution sucks */
-		cproc.setImage(colorProc.getImage());
-		cproc.trim(5);		
-
-		colorProc.setImage(cproc.getImage());
-		greyscaleThreshold = colorProc.getGreyscale();
-		
-		float[][] supressedThreshold = new float[greyscaleThreshold.length]
-				[greyscaleThreshold[0].length];
-		
-		for (int x = 0; x < greyscaleThreshold.length; x++) {
-			for (int y = 0; y < greyscaleThreshold[0].length; y++) {
-				if (greyscaleThreshold[x][y] != 0) {
-					float theta = (float)Math
-							.atan2(yPartial[x][y], xPartial[x][y]);
+				if (greyscale[x][y] != 0) {
+					float theta = cproc.gradientAngle(greyscale, x, y, gradientX, gradientY);
 					
-					float neighborOne =
-							getNeighbor(greyscaleThreshold, x, y, theta, 1);
-					float neighborTwo = 
-							getNeighbor(greyscaleThreshold, x, y, theta, -1);
+					float n1 = getNeighbor(greyscale, x, y, theta, 1);
+					float n2 = getNeighbor(greyscale, x, y, theta, -1);
+					//float n3 = getNeighbor(greyscale, x, y, theta, 2);
+					//float n4 = getNeighbor(greyscale, x, y, theta, -2);
 					
-					if (greyscaleThreshold[x][y]
-						< Math.max(neighborOne, neighborTwo)) {
-						supressedThreshold[x][y] = 0.0f;
+					if (greyscale[x][y] < Math.max(n1, n2)) {
+						supressed[x][y] = 0.0f;
 					} else {
-						supressedThreshold[x][y] = greyscaleThreshold[x][y]; 
+						supressed[x][y] = greyscale[x][y]; 
 					}
 				}
 			}
 		}
 		
-		colorProc.setFromGreyscale(supressedThreshold);
-		colorProc.writeWorkingImage(outf4);
+		cproc.setFromGreyscale(supressed);
+		cproc.writeWorkingImage(outf4);
 		
 		/* step 5: two thresholds */
+		int lower = 120;
+		int upper = 175;
+		ImageProcessor t1 = new ImageProcessor(supressed, cproc.getType());
+		ImageProcessor t2 = new ImageProcessor(supressed, cproc.getType());
 		
-		float[][] t1 = new float[supressedThreshold.length][supressedThreshold[0].length];
-		float[][] t2 = new float[supressedThreshold.length][supressedThreshold[0].length];
+		t1.threshold(lower);
+		t2.threshold(upper);
 		
-		for (int x = 0; x < greyscale.length; x++) {
-			for (int y = 0; y < greyscale[0].length; y++) {
-				float grad = magnitude(xPartial[x][y], yPartial[x][y]);
-				if (grad < threshold) {
-					greyscaleThreshold[x][y] = 0.0f;
-				} else {
-					greyscaleThreshold[x][y] = grad;
-				}
-			}
-		}
+		t1.writeWorkingImage(outf5t1);
+		t2.writeWorkingImage(outf5t2);
 		
-		colorProc.setFromGreyscale(greyscaleThreshold);
-		colorProc.writeWorkingImage(outf3);	
+		/* step 6: connect the edges */
 	}
 	
 	private static float magnitude(float x, float y) {
@@ -292,14 +226,88 @@ public class LabNine {
 	
 	private static float getNeighbor(float[][] image, int x, int y,
 			float theta, int distance) {
-		int neighborX = x + (int)(Math.cos(theta)*distance); 
-		int neighborY = y + (int)(Math.sin(theta)*distance);
+		
+		theta %= (2.0*Math.PI);
+		int neighborX = x;
+		int neighborY = y;
+		
+		if (- Math.PI/8 <= theta && theta <= Math.PI/8 ) { // theta ~= 0
+			neighborX = x + distance;
+			neighborY = y;
+		} else if (theta <= 3*Math.PI/8) { // theta ~= pi/4
+			neighborX = x + distance;
+			neighborY = y + distance;
+		} else if (theta <= 5*Math.PI/8) { // theta ~= pi/2
+			neighborX = x;
+			neighborY = y + distance;
+		} else if (theta <= 7*Math.PI/8) { // theta ~= 3pi/4
+			neighborX = x - distance;
+			neighborY = y + distance;
+		} else if (theta <= 9*Math.PI/8) { // theta ~= pi
+			neighborX = x - distance;
+			neighborY = y;
+		} else if (theta <= 11*Math.PI/8) { // theta ~= 5pi/4
+			neighborX = x - distance;
+			neighborY = y - distance;
+		} else if (theta <= 13*Math.PI/8) { // theta ~= 3pi/2
+			neighborX = x;
+			neighborY = y - distance;
+		} else if (theta <= 15*Math.PI/8) { // theta ~= 7pi/4
+			neighborX = x + distance;
+			neighborY = y - distance;
+		}
 		
 		try {
 			return image[neighborX][neighborY];
 		} catch (ArrayIndexOutOfBoundsException e) {
 			//System.err.println("labNine.getNeighbor: caught index out of bounds exception");
-			return 1.0f;
+			return 0f;
 		}
+	}
+	
+	private static ImageProcessor connect(ImageProcessor upper,
+			ImageProcessor lower, int length) {
+		
+		float[][] gUpper = upper.getGreyscale();
+		float[][] gLower = upper.getGreyscale();
+		Iterator<Pixel> iter = upper.iterator();
+		
+		while (iter.hasNext()) {
+			Pixel pix = iter.next();
+			if (pix.getGrey() == 0) {
+				continue;
+			}
+			
+			// if has non-zero neighbor, look for other neighbors that are in lower
+			// but not upper
+		}
+		
+		return new ImageProcessor(gUpper, upper.getType());
+	}
+	
+	/**
+	 * Finds neighbors of upper in lower (a different image)
+	 * @param upper
+	 * @param lower
+	 * @return
+	 */
+	private static ArrayList<Pixel> getNewNeighbors(Pixel upper, Pixel lower) {
+		assert(upper.getX() == lower.getX() && upper.getY() == lower.getY());
+		
+		// It makes no sense to call this method on two of the same image
+		// and I don't want to think about the edge cases that would
+		// bring up, so we're just going to say you can't unless I find
+		// a reason to do otherwise
+		assert(upper.getParentHash() != lower.getParentHash());
+		
+		ArrayList<Pixel> neighbors = new ArrayList<>();
+		
+		for (int x = 0; x < 3; x++) {
+			for (int y = 0; y < 3; y++) {
+				if ()
+			}
+		}
+		
+		return neighbors;
 	}
 }
