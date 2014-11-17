@@ -290,6 +290,23 @@ public class ImageProcessor {
 		}
 		setFromGreyscale(magnitude);
 	}
+	
+	public void trim(int width) {
+		BufferedImage result = new BufferedImage(workingImage_.getWidth() - 2*width, 
+				workingImage_.getHeight() - 2*width, workingImage_.getType());
+		ImageProcessor proc = new ImageProcessor(result);
+		
+		Pixel thisPix = new Pixel(this.workingImage_);
+		Iterator<Pixel> iter = proc.iterator();
+		while(iter.hasNext()) {
+			Pixel outPix = iter.next();
+			int x = outPix.getX();
+			int y = outPix.getY();
+			thisPix.moveTo(x + width, y + width);
+			outPix.set(thisPix.get());
+		}
+		workingImage_ = result;
+	}
 		
 	/* convolution helpers */
 		

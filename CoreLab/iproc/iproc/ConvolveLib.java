@@ -28,6 +28,17 @@ public class ConvolveLib {
 	public static final float[][] KERNEL_LAB9_LAPLACE_OF_GAUSS_5 =
 		{{0,0,1,0,0}, {0,1,2,1,0}, {1,2,-16,2,1}, {0,1,2,1,0}, {0,0,1,0,0}};
 	
+	/**
+	 * source: 
+	 * http://en.wikipedia.org/wiki/Canny_edge_detector#Noise_reduction
+	 */
+	public static final float[][] KERNEL_LAB9_GAUSS =
+		{{2f/159f, 4f/159f, 5f/159f, 4f/159f, 2f/159f},
+		 {4f/159f, 9f/159f, 12f/159f, 9f/159f, 4f/159f},
+		 {5f/159f, 12f/159f, 15f/159f, 12f/159f, 5f/159f},
+		 {4f/159f, 9f/159f, 12f/159f, 9f/159f, 4f/159f},
+		 {2f/159f, 4f/159f, 5f/159f, 4f/159f, 2f/159f}};
+	
 	/* gradient kernels */
 	
 	public static final float[][] GRAD_ROBERTS_X = {{-1,1}, {0,0}};
@@ -39,6 +50,19 @@ public class ConvolveLib {
 	
 	public static final float[][] GRAD_SOBEL_Y =
 		{{-1,-2,1}, {0,0,0}, {1,2,1}};
+	
+	/**
+	 * source: 
+	 * http://en.wikipedia.org/wiki/Sobel_operator#Alternative_operators
+	 * 
+	 * The Scharr operators are similar the Sobel operators, but they are
+	 * rotationally symmetric. 
+	 */
+	public static final float[][] GRAD_SCHARR_X =
+		{{3,0,-3}, {10,0,-10}, {3,0,-3}};
+			
+	public static final float[][] GRAD_SCHARR_Y =
+		{{3,10,3}, {0,0,0}, {-3,-10,-3}};
 	
 	public static final float[][] GRAD_PREWITT_X_3 =
 		{{-1,0,1}, {-1,0,1}, {-1,0,1}};
