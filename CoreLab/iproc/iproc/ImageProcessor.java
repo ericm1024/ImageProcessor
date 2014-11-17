@@ -41,7 +41,6 @@ public class ImageProcessor {
 		imageType_ = -1;
 	}
 	
-	
 	/**
 	 * Basic constructor for an ImageProcessor from a file
 	 * 
@@ -61,6 +60,15 @@ public class ImageProcessor {
 		setImage(image);
 	}
 	
+	/**
+	 * Constructor from greyscale array
+	 * 
+	 * @param image : the image as a 2d array of floats
+	 */
+	public ImageProcessor(float[][] image, int type) {
+		workingImage_ = new BufferedImage(image.length, image[0].length, type);
+		setFromGreyscale(image);
+	}
 	
 	/* public functions */
 	
@@ -137,6 +145,10 @@ public class ImageProcessor {
 	public void setImage(BufferedImage image) {
 		workingImage_ = image;
 		imageType_ = workingImage_.getType();
+	}
+	
+	public int getType() {
+		return imageType_;
 	}
 	
 	/**
@@ -288,7 +300,7 @@ public class ImageProcessor {
 				magnitude[x][y] = (float)Math.sqrt(xmag*xmag + ymag*ymag);
 			}
 		}
-		setFromGreyscale(magnitude);
+		setFromGreyscale(normalizeArray(magnitude));
 	}
 	
 	public void trim(int width) {
@@ -307,7 +319,69 @@ public class ImageProcessor {
 		}
 		workingImage_ = result;
 	}
-		
+	
+	public void detectZeroCrossing(float thresh, int windowSize) {
+		float[][] grey = getGreyscale();
+		float[][] output = new float[grey.length][grey[0].length];
+
+		for (int x = 0; x < grey.length; x++) {
+			for (int y = 0; y < grey[0].length; y++) {
+				float min = Float.MAX_VALUE;
+				float max = Float.MIN_VALUE;
+				
+				for (int i = -(windowSize/2); i < windowSize/2; i++) {
+					for (int j = -(windowSize/2); j < windowSize/2; j++) {
+						
+						// bounds check
+						if (0 < x+i && x+i < grey.length 
+								&& 0 < y +j && y+j <grey[0].length) {
+							float g = grey[x+i][y+j];
+							if (g < min) {
+								min = g;
+							}
+							if (g > max) {
+								max = g;
+							}
+						}
+					}
+				}
+				float local = grey[x][y];
+				if (Math.abs(local - min) > thresh && Math.abs(local - max) > thresh) {
+					output[x][y] = max - min;
+				} else {
+					output[x][y] = RawPixel.FLOAT_COLOR_MIN;
+				}
+			}
+		}
+		setFromGreyscale(output);
+	}
+	
+	public void threshold(int thresh) {
+		Iterator<Pixel> iter = iterator();
+		while (iter.hasNext()) {
+			Pixel pix = iter.next();
+			if (pix.getGrey() < thresh) {
+				pix.setGrey(0);
+			}
+		}
+	}
+
+	public void threshold(float thresh) {
+		Iterator<Pixel> iter = iterator();
+		while (iter.hasNext()) {
+			Pixel pix = iter.next();
+			if (pix.getGreyFloat() < thresh) {
+				pix.setGrey(0);
+			}
+		}
+	}
+	
+	public float gradientAngle(float[][] image, int x, int y, float[][] gradX, float[][] gradY) {
+		float px = convolveOncePrimative(x,y,gradX,image);
+		float py = convolveOncePrimative(x,y,gradY,image);
+		return (float)Math.atan2(py, px);
+	}
+	
 	/* convolution helpers */
 		
 	private void convolveOnce(float[][] kernel, Pixel outputPixel) {
@@ -358,7 +432,6 @@ public class ImageProcessor {
 				}
 			}
 		}
-
 		outputPixel.set(getMedianPixel(pixels));
 	}
 	
@@ -387,7 +460,7 @@ public class ImageProcessor {
 			// get the middle value
 			median.setColor(localColor, localCounts[localCounts.length/2]);
 		}
-		
+		median.setColor(ColorField.ALPHA, RawPixel.INT_COLOR_MAX);
 		return median;
 	}
 	
@@ -546,6 +619,9 @@ public class ImageProcessor {
 	}
 	
 	public void setFromGreyscale(float[][] greyscale) {
+		workingImage_ = new BufferedImage(greyscale.length, 
+				greyscale[0].length, workingImage_.getType());
+		
 		Iterator<Pixel> pixItter = iterator();
 		
 		while (pixItter.hasNext()) {
@@ -1460,5 +1536,37 @@ public class ImageProcessor {
 			}
 		}
 		return closestIndex;
+	}
+	
+	/**
+	 * Normalize every element in the array to the range [0,1]
+	 * @param data. the array to normalize
+	 * @return the array, normalized 
+	 */
+	private float[][] normalizeArray(float[][] data) {
+		float min = Float.MAX_VALUE;
+		float max = Float.MIN_VALUE;
+		
+		for (int i = 0; i < data.length; i++) {
+			for (int j = 0; j < data[0].length; j++) {
+				float x = data[i][j];
+				if (x < min) {
+					min = x;
+				}
+				if (x > max) {
+					max = x;
+				}
+			}
+		}
+		
+		float offset = 0 - min;
+		float multiplier = 1f/(max-min);
+		
+		for (int i = 0; i < data.length; i++) {
+			for (int j = 0; j < data[0].length; j++) {
+				data[i][j] = (data[i][j] + offset) * multiplier;
+			}
+		}
+		return data;
 	}
 }
