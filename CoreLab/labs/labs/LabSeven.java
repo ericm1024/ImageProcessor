@@ -28,18 +28,18 @@ public class LabSeven {
 	}
 	
 	public static void problemTwo() {
-		float numSigma = 2;
-		float sigma = 7f/(2*numSigma);
+		int width = 7;
+		float sigma = 2f;
 		File outputFile1 = new File(WORK_DIR+"gauss-kernel-sigma="+sigma+"pixels.png");
 		
 		proc7.readWorkingImage(baseFile);
-		proc7.convolve(ConvolveLib.getGaussKernel(7, numSigma));
+		proc7.convolve(ConvolveLib.getGauss(width, sigma));
 		proc7.writeWorkingImage(outputFile1);
 	}
 
 	public static void problemThree() {
-		int side = 3;
-		int thickness = 1;
+		int side = 5;
+		int thickness = 3;
 		File outputFile1 = new File(WORK_DIR+"cross-median-filter-side="+side+",thickness="+thickness+".png");
 		
 		proc7.readWorkingImage(baseFile);
@@ -51,12 +51,12 @@ public class LabSeven {
 		int side = 5;
 		int thickness = 1;	
 		int gaussSize = 5;
-		float numSigma = 2f;
+		float sigma = 2f;
 		
 		File outputFile1 = new File(WORK_DIR+"best-cleanup.png");
 		proc7.readWorkingImage(baseFile);
 		proc7.medianFilter(ConvolveLib.getCrossFilter(side, thickness));
-		proc7.convolve(ConvolveLib.getGaussKernel(gaussSize, numSigma));
+		proc7.convolve(ConvolveLib.getGauss(gaussSize, sigma));
 		proc7.writeWorkingImage(outputFile1);
 	}
 }
