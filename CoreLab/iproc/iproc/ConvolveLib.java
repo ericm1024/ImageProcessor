@@ -6,8 +6,8 @@ public class ConvolveLib {
 	
 	/* lab 7 */ 
 	
-	public static final float[][] KERNEL_LAB7_W5 =
-		{{1,2,1}, {2,4,2}, {1,2,1}};
+	public static final float[][] KERNEL_LAB7_W5 = {{1f/16f,2f/16f,1f/16f},
+		{2f/16f,4f/16f,2f/16f}, {1f/16f,2f/16f,1f/16f}};
 	
 	/* lab 8 */
 	
@@ -23,7 +23,10 @@ public class ConvolveLib {
 		{{0,1,0}, {1,-4,1}, {0,1,0}};
 	
 	public static final float[][] KERNEL_LAB9_LAPLACE_2 =
-		{{-1,-1,-1}, {-1,8,-1}, {-1,-1,-1}};
+		{{1,1,1}, {1,-8,1}, {1,1,1}};
+	
+	public static final float[][] KERNEL_LAB9_LAPLACE_3 =
+		{{0.5f,1,0.5f}, {1,-6,1}, {0.5f,1,0.5f}};
 	
 	public static final float[][] KERNEL_LAB9_LAPLACE_OF_GAUSS_5 =
 		{{0,0,1,0,0}, {0,1,2,1,0}, {1,2,-16,2,1}, {0,1,2,1,0}, {0,0,1,0,0}};
@@ -198,6 +201,7 @@ public class ConvolveLib {
 		return ConvolveLib.normalizeKernel(kernel);
 	}
 	
+	@Deprecated
 	public static float[][] getGaussKernel(int width, float numSigma) {
 		assert (width%2 == 1); // odd 
  		float[][] kernel = new float[width][width];
@@ -207,6 +211,19 @@ public class ConvolveLib {
 		for (int x = 0; x < kernel.length; x++) {
 			for (int y = 0; y < kernel[0].length; y++) {
 				kernel[x][y] = gauss2D(x - offset, y - offset, sigma);
+			}
+		}
+		return normalizeKernel(kernel);
+	}
+	
+	public static float[][] getGauss(int width, float sigma) {
+		assert (width%2 == 1); // odd 
+ 		float[][] kernel = new float[width][width];
+ 		int offset = width/2;
+		
+		for (int x = 0; x < kernel.length; x++) {
+			for (int y = 0; y < kernel[0].length; y++) {
+				kernel[x][y] = gauss2DV2(x - offset, y - offset, sigma);
 			}
 		}
 		return normalizeKernel(kernel);
@@ -308,6 +325,7 @@ public class ConvolveLib {
 	
 	/* helper for getGaussKernel */
 	
+	@Deprecated
 	private static float gauss2D(int x, int y, float sigma) {
 		float var = sigma * sigma;             // sigma squared
 		float a = 1/(sigma*(float)Math.sqrt(2*Math.PI));  // coefficient
@@ -315,5 +333,16 @@ public class ConvolveLib {
 					 (float)(y*y)/(2 * var);  // exponent
 		
 		return a * (float)Math.pow(Math.E, - exp);
+	}
+	
+	private static float gauss2DV2(int x, int y, float sigma) {
+		// 2 sigma^2
+		float t = 2f * sigma * sigma; 
+		// coefficient
+		float a = 1f/(t*(float)Math.PI);
+		// exponent
+		float exp = -(float)(x*x + y*y)/t;
+		
+		return a * (float)Math.pow(Math.E, exp);
 	}
 }
