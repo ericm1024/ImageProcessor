@@ -10,3 +10,7 @@
 		ones that boundary check and ones that do not.
 
 * fix convolution edge behavior (how ?)
+
+* cache arrays in ImageProcessor (from getGreyscale, etc.)
+
+* create an interpolated image to work with floating point indices
