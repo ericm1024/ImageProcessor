@@ -40,6 +40,16 @@ public class Pixel {
 	public Pixel(BufferedImage image) {
 		this(image, 0, 0);
 	}
+	
+	/**
+	 * copy constructor
+	 */
+	public Pixel(Pixel other) {
+		x_ = other.x_;
+		y_ = other.y_;
+		pixel_ = new RawPixel(other.pixel_);
+		parent_ = other.parent_;
+	}
 
 	public int getX() {
 		return x_;
