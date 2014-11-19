@@ -111,6 +111,38 @@ public class Sort {
 		public int size() {
 			return this.heapdata.size(); // Uses ArrayList's size method
 		}
+
+	    
+	    /**
+	     * inserts an element to the heap and maintains the heap property
+	     * @param val, the value to be inserted to the heap
+	     */
+	    public void insert(int val) {
+		      this.heapdata.add(val); // adds to the back of the heapdata
+		      this.percolateUp();  // fixes the heap up!
+	    }
+	
+		/**
+		 * removes and returns the minimum value in the heap
+		 *   it makes sure the heap property is maintained, too
+		 * @return the smallest value that was in the heap
+		 */
+	    public int removeMin() {
+		      if (this.size() <= 0)  {
+		        System.out.println("Error: can not remove from an empty heap.");
+		        return -1;
+		      }
+		      // get the min, remove the last element
+		      int min = heapdata.get(0);
+		      int end = heapdata.remove(heapdata.size()-1);
+		      // percolate if necessary
+		      if (heapdata.size() > 0) {
+		        this.heapdata.set(0, end);
+		        this.percolateDown(); 
+		      }
+		      // now, we return that min
+		      return min;
+	    }	
     
 	    /**
 	     * percolate_up should adjust the last element of the heap
@@ -224,37 +256,6 @@ public class Sort {
 	    private int rChild(int parentIndex) {
 	    	return parentIndex * 2 + 2;
 	    }
-		    
-	    /**
-	     * inserts an element to the heap and maintains the heap property
-	     * @param val, the value to be inserted to the heap
-	     */
-	    public void heap_insert(int val) {
-		      this.heapdata.add(val); // adds to the back of the heapdata
-		      this.percolateUp();  // fixes the heap up!
-	    }
-    
-    /**
-     * removes and returns the minimum value in the heap
-     *   it makes sure the heap property is maintained, too
-     * @return the smallest value that was in the heap
-     */
-    public int heap_remove_min() {
-      if (this.size() <= 0)  {
-        System.out.println("Error: can not remove from an empty heap.");
-        return -1;
-      }
-      // get the min, remove the last element, and then fix things up...
-      int min = heapdata.get(0);
-      int end = heapdata.remove(heapdata.size()-1); // size is now one smaller
-      // percolate if there are elements still in the heap!
-      if (heapdata.size() > 0) {
-        this.heapdata.set(0, end);
-        this.percolateDown(); 
-      }
-      // now, we return that min
-      return min;
-    }
   }
   
   /**
@@ -263,19 +264,14 @@ public class Sort {
    * @param A, the array to be sorted
    */
   public static void heapsort(int[] A) {
-	// create our heap, H
-	Heap H = new Sort.Heap();
-	// put all of the elements into the heap
+	Heap h = new Sort.Heap();
 	for (int n:A) {
-	  H.heap_insert(n);
-	  //System.out.println("Add " + n + " to get " + H);
+	  h.insert(n);
 	}
-	// take the min values out of the heap
+
 	for (int i=0 ; i<A.length ; ++i) {
-	  A[i] = H.heap_remove_min();
-	  //System.out.println("Remove first " + A[i] + " to leave " + H);
+	  A[i] = h.removeMin();
 	}
-	//System.out.println("A is now " + Arrays.toString(A));
 	return;
   }
 
