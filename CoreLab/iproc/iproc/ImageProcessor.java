@@ -1,6 +1,7 @@
 package iproc;
 
-import iproc.RawPixel.ColorField;
+import iproc.lib.RawPixel;
+import iproc.lib.RawPixel.ColorField;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;

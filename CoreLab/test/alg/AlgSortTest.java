@@ -1,4 +1,4 @@
-package iproc;
+package alg;
 
 import static org.junit.Assert.assertArrayEquals;
 

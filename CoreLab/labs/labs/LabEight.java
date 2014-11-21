@@ -1,7 +1,7 @@
 package labs;
 
 import iproc.ImageProcessor;
-import iproc.ConvolveLib;
+import iproc.lib.ConvolveLib;
 
 import java.awt.image.BufferedImage;
 import java.io.File;

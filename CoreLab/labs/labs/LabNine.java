@@ -1,9 +1,10 @@
 package labs;
 
-import iproc.ConvolveLib;
 import iproc.ImageProcessor;
 import iproc.Pixel;
-import iproc.RawPixel;
+import iproc.lib.ConvolveLib;
+import iproc.lib.Point;
+import iproc.lib.RawPixel;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -127,6 +128,7 @@ public class LabNine {
 		/* step 5: hysteresis */
 		int lower = 80;
 		int upper = 100;
+		int maxpath = 10;
 		
 		/*
 		Iterator<Pixel> iter = proc.iterator();
@@ -159,13 +161,30 @@ public class LabNine {
 			} else if (pix.getGrey() >= upper) { // if its above the upper threshold, we keep it
 				pix.setGrey(RawPixel.INT_COLOR_MAX);
 			} else {
-				HashSet<int[]> seen = new HashSet<>();
+				HashSet<Point> seen = new HashSet<>();
 				// get the pixel's neighbors that are above the minthresh
+				HashSet<Pixel> neighbors = newNeighborsOf(pix, seen, lower);
 				
 				// if it has no neighboring pixels above the top threshold, continue
+				Iterator<Pixel> neighborIter = neighbors.iterator();
+				Boolean found = false;
+				while (neighborIter.hasNext()) {
+					if (neighborIter.next().getGrey() >= upper) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					continue;
+				}
 				
 				// else, while the neighbors list is not empty and we haven't exceded our
 				// max path length
+				int pathLength = 0;
+				while (!neighbors.isEmpty() && pathLength < maxpath) {
+					pathLength++;
+				}
+				
 				// get the next neighbor
 				// store its coordinates in a hash table (if we've seen it before, skip)
 				// add its neighbors that are above the minthresh to the neighbors list 
@@ -223,21 +242,22 @@ public class LabNine {
 	 * @param pix
 	 * @return
 	 */
-	private static ArrayList<Pixel> newNeighborsOf(Pixel pix, HashSet<int[]> seen, int thresh) {
+	private static HashSet<Pixel> newNeighborsOf(Pixel pix, HashSet<Point> seen, int thresh) {
 		
-		ArrayList<Pixel> neighbors = new ArrayList<>();
+		HashSet<Pixel> neighbors = new HashSet<>();
 		int srcX = pix.getX();
 		int srcY = pix.getY();
 		int window = 3;
 		
 		for (int x = -(window/2); x < window/2; x++) {
 			for (int y = -(window/2); y < window/2; y++) {
-				if (!pix.inImage(srcX + x,  srcY + y) || (x == 0 && y == 0)) { 
+				if (!pix.inImage(srcX + x,  srcY + y)) { 
 					continue;
 				}
 				pix.moveTo(srcX + x, srcY + y);
-				if (seen.equals({))
-				neighbors.add(new Pixel(pix));
+				if (!seen.contains(pix.where())  && pix.getGrey() >= thresh) {
+					neighbors.add(new Pixel(pix));
+				}
 			}
 		}
 		// move the pixel back where we found it

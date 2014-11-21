@@ -6,8 +6,8 @@ import java.util.Iterator;
 
 import iproc.ImageProcessor;
 import iproc.Pixel;
-import iproc.RawPixel;
-import iproc.RawPixel.ColorField;
+import iproc.lib.RawPixel;
+import iproc.lib.RawPixel.ColorField;
 
 public class LabOne {
 	

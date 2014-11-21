@@ -1,5 +1,8 @@
 package iproc;
 
+import iproc.lib.Point;
+import iproc.lib.RawPixel;
+
 import java.awt.image.BufferedImage;
 
 public class Pixel {
@@ -57,6 +60,10 @@ public class Pixel {
 	
 	public int getY() {
 		return y_;
+	}
+	
+	public Point where() {
+		return new Point(x_, y_);
 	}
 	
 	/**

@@ -1,7 +1,8 @@
-package iproc;
+package alg;
+
+import iproc.lib.Array;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * a class for several sorting algorithms
@@ -256,53 +257,40 @@ public class Sort {
 	    private int rChild(int parentIndex) {
 	    	return parentIndex * 2 + 2;
 	    }
-  }
-  
-  /**
-   * heapsort sorts by creating a min-heap and then removing
-   *     consecutive minimum elements until it's done!
-   * @param A, the array to be sorted
-   */
-  public static void heapsort(int[] A) {
-	Heap h = new Sort.Heap();
-	for (int n:A) {
-	  h.insert(n);
 	}
+  
+	/**
+	 * heapsort sorts by creating a min-heap and then removing
+	 *     consecutive minimum elements until it's done!
+	 * @param A, the array to be sorted
+	 */
+	public static void heapsort(int[] A) {
+		Heap h = new Sort.Heap();
+		// construct the heap
+		for (int n:A) { 
+			h.insert(n);
+		}
 
-	for (int i=0 ; i<A.length ; ++i) {
-	  A[i] = h.removeMin();
+		for (int i=0 ; i<A.length ; ++i) {
+			A[i] = h.removeMin();
+		}
+		return;
 	}
-	return;
-  }
-
-  /**
-   * main, used for less formal tests than the JUnit ones...
-   * @param args, the command-line inputs, not used here
-   */
-  public static void main(String[] args) {
-    int[] A = { 6, 2, 9, 3, 4, 8, 0, 1, 7, 5 };
-    //int[] A = { 9, 9, 0, 9, 9, 0, 0, 0, 9, 0, 7 };
-    System.out.println("A is " + Arrays.toString(A));
-    //bucketsort( A );
-    heapsort( A );
-    //minsort(A);
-    System.out.println("A is " + Arrays.toString(A));
-  }
   
   
   
-  /**
-   * extra credit #2 - quicksort
-   *   sorts in place - and without add'l arrays!
-   * @param A, an array of ints
-   */
-  public static void quicksort(int[] A) {
-    // TODO - if you'd like to try the ex. cr.
-    Arrays.sort( A );
-    // this lets all the tests pass, for now...
-    // though it won't count as ex cr :^)
-  }
-
+	/**
+	 * extra credit #2 - quicksort
+	 *   sorts in place - and without add'l arrays!
+	 * @param A, an array of ints
+	 */
+	public static void quicksort(int[] A) {
+		
+	}
+	
+	private static void quicksortIteration(int[] A, int low, int high) {
+		
+	}
 }
 
 

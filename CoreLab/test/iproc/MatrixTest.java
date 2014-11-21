@@ -1,6 +1,7 @@
 package iproc;
 
 import static org.junit.Assert.*;
+import iproc.lib.Matrix;
 
 import org.junit.Test;
 
