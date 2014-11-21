@@ -1,17 +1,15 @@
 package labs;
 
 import iproc.ImageProcessor;
-import iproc.HistogramProcessor;
 
 import java.io.File;
-
 
 public class LabFive {
 	public static String WORK_DIR = "/Users/eric/Desktop/mudd_fall2014/lab/5/";
 	public static File baseFile = new File(WORK_DIR+"LennaG.png");
 	
-	private static LabFiveProcessor proc5 = new LabFiveProcessor();
-	private static HistogramProcessor procH = new HistogramProcessor();
+	private static ImageProcessor proc5 = new ImageProcessor();
+	private static ImageProcessor procH = new ImageProcessor();
 	
 	public static void main(String args[]) {
 		problemOne();
@@ -61,8 +59,8 @@ public class LabFive {
 	}
 	
 	
-	private static double[] problemTwoHistogram() {
-		double[] histogram = new double[ImageProcessor.NUM_COLORS];
+	private static float[] problemTwoHistogram() {
+		float[] histogram = new float[ImageProcessor.NUM_COLORS];
 		
 		for (int i = 0; i < histogram.length; i++) {
 			if (i < ImageProcessor.NUM_COLORS/2) {
@@ -71,13 +69,13 @@ public class LabFive {
 				histogram[i] = ImageProcessor.NUM_COLORS - i;
 			}
 		}
-		LabFiveProcessor.normalize(histogram);
+		ImageProcessor.normalize(histogram);
 		return histogram;
 	}
 	
 	
-	private static double[] problemThreeHistogram() {
-		double[] histogram = new double[ImageProcessor.NUM_COLORS];
+	private static float[] problemThreeHistogram() {
+		float[] histogram = new float[ImageProcessor.NUM_COLORS];
 		
 		for (int i = 0; i < histogram.length; i++) {
 			if (i < ImageProcessor.NUM_COLORS/2) {
@@ -86,7 +84,7 @@ public class LabFive {
 				histogram[i] = i - ImageProcessor.NUM_COLORS/2;
 			}
 		}
-		LabFiveProcessor.normalize(histogram);
+		ImageProcessor.normalize(histogram);
 		return histogram;
 	}
 }

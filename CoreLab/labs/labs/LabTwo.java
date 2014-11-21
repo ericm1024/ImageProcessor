@@ -1,12 +1,15 @@
 package labs;
+
+import iproc.ImageProcessor;
+
 import java.io.File;
 
-public class labTwo {
+public class LabTwo {
 	
 	public static String WORK_DIR = "/Users/eric/Desktop/mudd_fall2014/lab/2/";
 	public static File baseFile = new File(WORK_DIR+"haswell-e-die-shot.jpg");
 	
-	private static LabTwoProcessor proc = new LabTwoProcessor();
+	private static ImageProcessor proc = new ImageProcessor();
 	
 	public static void main(String args[]) {
 		problemOne();
@@ -18,7 +21,7 @@ public class labTwo {
 		File outputFile = new File(WORK_DIR+"img1.png");
 		proc.readWorkingImage(baseFile);
 		
-		proc.resize(0.75, 1.5);
+		proc.resize(0.75f, 1.5f);
 		proc.writeWorkingImage(outputFile);
 	}
 	
@@ -26,7 +29,7 @@ public class labTwo {
 		File outputFile = new File(WORK_DIR+"img2.png");
 		proc.readWorkingImage(baseFile);
 		
-		proc.rotate(Math.PI/6);
+		proc.rotate((float)Math.PI/6f);
 		proc.writeWorkingImage(outputFile);
 	}
 	
@@ -34,7 +37,7 @@ public class labTwo {
 		File outputFile = new File(WORK_DIR+"img3.png");
 		proc.readWorkingImage(baseFile);
 		
-		proc.rotate(-Math.PI/6);
+		proc.rotate(-(float)Math.PI/6f);
 		proc.writeWorkingImage(outputFile);
 	}
 	

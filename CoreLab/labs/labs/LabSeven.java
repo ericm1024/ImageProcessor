@@ -1,6 +1,7 @@
 package labs;
-import iproc.ConvolutionProcessor;
-import iproc.ConvolveLib;
+
+import iproc.ImageProcessor;
+import iproc.lib.ConvolveLib;
 
 import java.io.File;
 
@@ -9,8 +10,7 @@ public class LabSeven {
 	public static String WORK_DIR = "/Users/eric/Desktop/mudd_fall2014/lab/7/";
 	public static File baseFile = new File(WORK_DIR+"noisy_taxi.png");
 	
-	private static ConvolutionProcessor proc7 = new ConvolutionProcessor();
-	
+	private static ImageProcessor proc7 = new ImageProcessor();
 	
 	public static void main(String args[]) {
 		problemOne();
@@ -28,22 +28,22 @@ public class LabSeven {
 	}
 	
 	public static void problemTwo() {
-		double numSigma = 2.0;
-		double sigma = 7.0/(2*numSigma);
+		int width = 7;
+		float sigma = 2f;
 		File outputFile1 = new File(WORK_DIR+"gauss-kernel-sigma="+sigma+"pixels.png");
 		
 		proc7.readWorkingImage(baseFile);
-		proc7.convolve(ConvolveLib.getGaussKernel(7, numSigma));
+		proc7.convolve(ConvolveLib.getGauss(width, sigma));
 		proc7.writeWorkingImage(outputFile1);
 	}
 
 	public static void problemThree() {
-		int side = 3;
-		int thickness = 1;
+		int side = 5;
+		int thickness = 3;
 		File outputFile1 = new File(WORK_DIR+"cross-median-filter-side="+side+",thickness="+thickness+".png");
 		
 		proc7.readWorkingImage(baseFile);
-		proc7.filterImage(ConvolveLib.getCrossFilter(side, thickness));
+		proc7.medianFilter(ConvolveLib.getCrossFilter(side, thickness));
 		proc7.writeWorkingImage(outputFile1);
 	}
 	
@@ -51,12 +51,12 @@ public class LabSeven {
 		int side = 5;
 		int thickness = 1;	
 		int gaussSize = 5;
-		double numSigma = 2.0;
+		float sigma = 2f;
 		
 		File outputFile1 = new File(WORK_DIR+"best-cleanup.png");
 		proc7.readWorkingImage(baseFile);
-		proc7.filterImage(ConvolveLib.getCrossFilter(side, thickness));
-		proc7.convolve(ConvolveLib.getGaussKernel(gaussSize, numSigma));
+		proc7.medianFilter(ConvolveLib.getCrossFilter(side, thickness));
+		proc7.convolve(ConvolveLib.getGauss(gaussSize, sigma));
 		proc7.writeWorkingImage(outputFile1);
 	}
 }

@@ -8,13 +8,13 @@ public class LabThree {
 	public static String WORK_DIR = "/Users/eric/Desktop/mudd_fall2014/lab/3/";
 	public static File baseFile = new File(WORK_DIR+"Paolina1.png");
 	
-	private static LabThreeProcessor proc = new LabThreeProcessor();
+	private static ImageProcessor proc = new ImageProcessor();
 	
 	public static void main(String args[]) {
 		problemOne();
 		problemTwo();
-		problemThree(0.03);
-		problemFour(0.08);
+		problemThree(0.03f);
+		problemFour(0.08f);
 	}
 	
 	
@@ -25,7 +25,7 @@ public class LabThree {
 		
 		proc.readWorkingImage(baseFile);
 		proc.writeWorkingImage(outputFile1);	
-		ImageProcessor.writeImage(proc.greyHisto(), outputFile2);
+		ImageProcessor.writeImage(proc.histogramGrey(), outputFile2);
 	}
 	
 	
@@ -42,7 +42,7 @@ public class LabThree {
 	
 	// a histogram of the Paolina image with the top and bottom
 	// cutoffPercent of points removed
-	public static void problemThree(double cutoffPercent) {
+	public static void problemThree(float cutoffPercent) {
 		File outputFile1 = new File(WORK_DIR+"problem-three-Paolina.png");
 		File outputFile2 = new File(WORK_DIR+"problem-three-histogram.png");
 		
@@ -52,7 +52,7 @@ public class LabThree {
 		ImageProcessor.writeImage(proc.cutoffHisto(cutoffPercent), outputFile2);
 	}
 	
-	public static void problemFour(double cutoffPercent) {
+	public static void problemFour(float cutoffPercent) {
 		File myFile = new File(WORK_DIR+"haswell-e-die-shot.jpg");
 		File outputFile1 = new File(WORK_DIR+"problem-four-original.png");
 		File outputFile2 = new File(WORK_DIR+"problem-four-original-histogram.png");
@@ -63,7 +63,7 @@ public class LabThree {
 		
 		proc.makeGreyscale();
 		proc.writeWorkingImage(outputFile1);	
-		ImageProcessor.writeImage(proc.greyHisto(), outputFile2);
+		ImageProcessor.writeImage(proc.histogramGrey(), outputFile2);
 		
 		ImageProcessor.writeImage(proc.stretchCutoff(cutoffPercent), outputFile3);
 		ImageProcessor.writeImage(proc.cutoffHisto(cutoffPercent), outputFile4);

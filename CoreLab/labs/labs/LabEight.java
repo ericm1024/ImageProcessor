@@ -1,8 +1,7 @@
 package labs;
 
-import iproc.ColorspaceProcessor;
-import iproc.ConvolutionProcessor;
-import iproc.ConvolveLib;
+import iproc.ImageProcessor;
+import iproc.lib.ConvolveLib;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -10,7 +9,7 @@ import java.io.File;
 public class LabEight {
 	public static String WORK_DIR = "/Users/eric/Desktop/mudd_fall2014/lab/8/";
 	
-	private static ConvolutionProcessor cproc = new ConvolutionProcessor();
+	private static ImageProcessor cproc = new ImageProcessor();
 
 	public static void main(String args[]) {
 		problemOne();
@@ -25,12 +24,12 @@ public class LabEight {
 		File outputFile2 = new File(WORK_DIR+"w_5-high-pass.png");
 		File outputFile3 = new File(WORK_DIR+"w_5-high-boost.png");
 	
-		double[][] lpFilter = ConvolveLib.KERNEL_LAB7_W5;
-		double[][] apFilter = ConvolveLib.KERNEL_ALLPASS_3;
-		double[][] hpFilter = ConvolveLib.kernelDifference(apFilter, lpFilter);
-		double[][] hbFilter = ConvolveLib.kernelSum(apFilter, 
+		float[][] lpFilter = ConvolveLib.KERNEL_LAB7_W5;
+		float[][] apFilter = ConvolveLib.KERNEL_ALLPASS_3;
+		float[][] hpFilter = ConvolveLib.kernelDifference(apFilter, lpFilter);
+		float[][] hbFilter = ConvolveLib.kernelSum(apFilter, 
 								ConvolveLib.multiplyScalar(
-								ConvolveLib.KERNEL_LAB7_W5, 2.0/9.0));
+								ConvolveLib.KERNEL_LAB7_W5, 2f/9f));
 				
 		// low pass filtering
 		cproc.readWorkingImage(baseFile);
@@ -54,12 +53,12 @@ public class LabEight {
 		File outputFile2 = new File(WORK_DIR+"intensity-high-pass.png");
 		File outputFile3 = new File(WORK_DIR+"intensity-high-boost.png");
 	
-		double[][] lpFilter = ConvolveLib.KERNEL_LAB7_W5;
-		double[][] apFilter = ConvolveLib.KERNEL_ALLPASS_3;
-		double[][] hpFilter = ConvolveLib.kernelDifference(apFilter, lpFilter);
-		double[][] hbFilter = ConvolveLib.kernelSum(apFilter, 
+		float[][] lpFilter = ConvolveLib.KERNEL_LAB7_W5;
+		float[][] apFilter = ConvolveLib.KERNEL_ALLPASS_3;
+		float[][] hpFilter = ConvolveLib.kernelDifference(apFilter, lpFilter);
+		float[][] hbFilter = ConvolveLib.kernelSum(apFilter, 
 								ConvolveLib.multiplyScalar(
-								ConvolveLib.KERNEL_LAB7_W5, 2.0/9.0));
+								ConvolveLib.KERNEL_LAB7_W5, 2f/9f));
 		
 		// low pass filtering
 		cproc.readWorkingImage(baseFile);
@@ -133,12 +132,11 @@ public class LabEight {
 		cproc.writeWorkingImage(outputFile4);
 	}
 	
-	private static void convolveIntensity(BufferedImage img, final double[][] kernel) {
-		ColorspaceProcessor colorProc = new ColorspaceProcessor(img); 
-		double[][][] hsi = colorProc.getHsi();
+	private static void convolveIntensity(BufferedImage img, final float[][] kernel) {
+		ImageProcessor colorProc = new ImageProcessor(img); 
+		float[][][] hsi = colorProc.getHsi();
 		
-		hsi[2] = ConvolutionProcessor
-				.convolveArrayPrimative(kernel, hsi[2]);
+		hsi[2] = ImageProcessor.convolveArrayPrimative(kernel, hsi[2]);
 		
 		colorProc.setFromHsi(hsi);
 	}

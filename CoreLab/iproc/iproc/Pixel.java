@@ -1,5 +1,8 @@
 package iproc;
 
+import iproc.lib.Point;
+import iproc.lib.RawPixel;
+
 import java.awt.image.BufferedImage;
 
 public class Pixel {
@@ -40,6 +43,16 @@ public class Pixel {
 	public Pixel(BufferedImage image) {
 		this(image, 0, 0);
 	}
+	
+	/**
+	 * copy constructor
+	 */
+	public Pixel(Pixel other) {
+		x_ = other.x_;
+		y_ = other.y_;
+		pixel_ = new RawPixel(other.pixel_);
+		parent_ = other.parent_;
+	}
 
 	public int getX() {
 		return x_;
@@ -47,6 +60,19 @@ public class Pixel {
 	
 	public int getY() {
 		return y_;
+	}
+	
+	public Point where() {
+		return new Point(x_, y_);
+	}
+	
+	/**
+	 * To uniquely identify the parent image without having to pass it
+	 * arround.
+	 * @return the hash of the parent image
+	 */
+	public int getParentHash() {
+		return parent_.hashCode();
 	}
 	
 	public void set(RawPixel pixel) {
@@ -91,6 +117,25 @@ public class Pixel {
 				/3);
 	}
 	
+	public float getRedFloat() {
+		return pixel_.getColorFloat(RawPixel.ColorField.RED);
+	}
+	
+	public float getGreenFloat() {
+		return pixel_.getColorFloat(RawPixel.ColorField.GREEN);
+	}
+	
+	public float getBlueFloat() {
+		return pixel_.getColorFloat(RawPixel.ColorField.BLUE);
+	}
+	
+	public float getGreyFloat() {
+		return (pixel_.getColorFloat(RawPixel.ColorField.RED)
+				+ pixel_.getColorFloat(RawPixel.ColorField.GREEN)
+				+ pixel_.getColorFloat(RawPixel.ColorField.BLUE)
+				/3f);
+	}
+	
 	public void greyscale() {
 		int grey = getGrey();
 		pixel_.setColorAll(grey, grey, grey, 
@@ -104,16 +149,37 @@ public class Pixel {
 	}
 	
 	public void setGreen(int green) {
-		pixel_.setColor(RawPixel.ColorField.RED, green);
+		pixel_.setColor(RawPixel.ColorField.GREEN, green);
 		updateImage();
 	}
 	
 	public void setBlue(int blue) {
-		pixel_.setColor(RawPixel.ColorField.RED, blue);
+		pixel_.setColor(RawPixel.ColorField.BLUE, blue);
 		updateImage();
 	}
 	
 	public void setGrey(int grey) {
+		pixel_.setColorAll(grey, grey, grey,
+			pixel_.getColorInt(RawPixel.ColorField.ALPHA));
+		updateImage();
+	}
+	
+	public void setRed(float red) {
+		pixel_.setColor(RawPixel.ColorField.RED, red);
+		updateImage();
+	}
+	
+	public void setGreen(float green) {
+		pixel_.setColor(RawPixel.ColorField.GREEN, green);
+		updateImage();
+	}
+	
+	public void setBlue(float blue) {
+		pixel_.setColor(RawPixel.ColorField.BLUE, blue);
+		updateImage();
+	}
+	
+	public void setGrey(float grey) {
 		pixel_.setColorAll(grey, grey, grey,
 			pixel_.getColorInt(RawPixel.ColorField.ALPHA));
 		updateImage();

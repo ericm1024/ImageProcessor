@@ -5,17 +5,16 @@ import java.awt.image.BufferedImage;
 import java.util.Iterator;
 
 import iproc.ImageProcessor;
-import iproc.HistogramProcessor;
 import iproc.Pixel;
-import iproc.RawPixel;
-import iproc.RawPixel.ColorField;
+import iproc.lib.RawPixel;
+import iproc.lib.RawPixel.ColorField;
 
-public class labOne {
+public class LabOne {
 	
 	public static String WORK_DIR = "/Users/eric/Desktop/mudd_fall2014/lab/1/";
 	public static File baseFile = new File(WORK_DIR+"nature.jpg");
 	
-	private static HistogramProcessor proc = new HistogramProcessor();
+	private static ImageProcessor proc = new ImageProcessor();
 	
 	public static void main(String args[]) {
 		problemOne();
