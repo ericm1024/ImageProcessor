@@ -5,7 +5,10 @@ import iproc.lib.RawPixel;
 
 import java.awt.image.BufferedImage;
 
-public class Pixel {
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+public class Pixel extends Coordinate {
 
 	/* public data members */
 	
@@ -53,13 +56,46 @@ public class Pixel {
 		pixel_ = new RawPixel(other.pixel_);
 		parent_ = other.parent_;
 	}
+		
+	@Override
+	public boolean equals(Object other) {
+		if (other == null) { return false; }
+		   if (other == this) { return true; }
+		   if (other.getClass() != getClass()) {
+		     return false;
+		   }
+		   Pixel rhs = (Pixel) other;
+		   return new EqualsBuilder()
+		                 .append(parent_, rhs.parent_)
+		                 .append(x_, rhs.x_)
+		                 .append(y_, rhs.y_)
+		                 .append(pixel_, rhs.pixel_)
+		                 .isEquals();
+	}
+	
+	@Override
+	public int hashCode() {
+		 return new HashCodeBuilder(223027109, 2093916887).
+			       append(parent_).				
+			       append(x_).
+			       append(y_).
+			       append(pixel_).
+			       toHashCode();
+	}
 
+	@Override
 	public int getX() {
 		return x_;
 	}
 	
+	@Override
 	public int getY() {
 		return y_;
+	}
+	
+	@Override
+	public Coordinate makeCopy() {
+		return new Pixel(this);
 	}
 	
 	public Point where() {
