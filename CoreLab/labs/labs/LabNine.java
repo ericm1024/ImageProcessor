@@ -156,14 +156,14 @@ public class LabNine {
 		}
 		
 		if (!foundBlob) {
-			blobCache.add(new Blob(start));
+			blobCache.add(new Blob(start, lower));
 		}
 		
 		
 		return maxpath;
 	}
 	
-	private class Blob {
+	private static class Blob {
 		public Blob(Pixel root, int thresh) {
 			members = new SpaceTree<Pixel>();
 			Deque<Pixel> queue = new ArrayDeque<Pixel>();
@@ -208,8 +208,9 @@ public class LabNine {
 			return members.adjacent(pix);
 		}
 		
-		public Boolean insert(Pixel pix) {
-			return members.insert(pix);
+		public void insert(Pixel pix) {
+			members.insert(pix);
+			return;
 		}
 		
 		private SpaceTree<Pixel> members = null;

@@ -24,8 +24,15 @@ public class SpaceTree <T extends Coordinate > {
 	 * Constructor that allows adjacency type selection.
 	 * @param adj   the adjacency type.
 	 */
-	SpaceTree(AdjacencyType adj) {
+	public SpaceTree(AdjacencyType adj) {
 		adjType = adj;
+	}
+	
+	/**
+	 * Default constructor. Defaults adjacency type to CORNERS
+	 */
+	public SpaceTree() {
+		adjType = AdjacencyType.CORNERS;
 	}
 	
 	/**
@@ -56,20 +63,7 @@ public class SpaceTree <T extends Coordinate > {
 	 * @return true if elem exists in the SpaceTree, else false
 	 */
 	public Boolean contains(T elem) {
-		if (root == null) {
-			return false;
-		}
-		
-		Node current = root;
-		Quadrant quad = current.relativePosition(elem);
-		while (current.hasChild(quad)) {
-			if (elem.equals(current.getChild(quad))) {
-				return true;
-			}
-			current = current.getChild(quad);
-			quad = current.relativePosition(elem);
-		}
-		return false;
+		return contains(elem.getX(), elem.getY());
 	}
 	
 	/**
@@ -78,12 +72,43 @@ public class SpaceTree <T extends Coordinate > {
 	 * @return True if the element is adjacent to some element in the tree.
 	 */
 	public Boolean adjacent(T elem) {
-		if (root == null) {
-			return false;
+		int x = elem.getX();
+		int y = elem.getY();
+		
+		switch(adjType) {
+		case CORNERS:
+			/* Check corder adjacencies:
+			 * |X| |X|
+			 * | |E| |
+			 * |X| |X|
+			 */
+			if (contains(x+1, y+1) 
+					|| contains(x-1, y+1) 
+					|| contains(x+1, y-1) 
+					|| contains(x-1, y-1)) {
+				return true;
+			} // else, fall through
+		case NO_CORNERS:
+			/* Check linear adjacencies:
+			 * | |X| |
+			 * |X|E|X|
+			 * | |X| |
+			 */
+			if (contains(x, y+1) 
+					|| contains(x, y-1) 
+					|| contains(x+1, y) 
+					|| contains(x-1, y)) {
+				return true;
+			}
 		}
 		
-		return root.adjacent(elem);
+		return false;
 	}
+	
+	/**
+	 * 
+	 */
+	//public T closest 
 	
 	/**
 	 * The number of elements in the SpaceTree
@@ -132,18 +157,29 @@ public class SpaceTree <T extends Coordinate > {
 		 * member variable 'value'.
 		 */
 		private Quadrant relativePosition(T elem) {
-			double theta = Math.atan2(elem.getY() - value.getY(), 
-					elem.getX() - value.getX());
+			return relativePosition(elem.getX(), elem.getY());
+		}
+		
+		/**
+		 * Returns the quadrant that the given position is in,
+		 * relative to Node.value
+		 */
+		private Quadrant relativePosition(int x, int y) {			
+			int vx = value.getX();
+			int vy = value.getY();
 			
-			// theta ranges from -pi to pi (see the docs)
-			if (theta < -Math.PI/2 || theta == Math.PI) { // fuck floats
-				return Quadrant.QUAD_THREE;
-			} else if (theta < Math.PI) {
-				return Quadrant.QUAD_FOUR;
-			} else if (theta < Math.PI/2) {
+			if (vx == x || vy == y) {
+				System.out.println("iproc.SpaceTree.Node.relativePosition(): got invalid position.");
+			}
+			
+			if (x > vx && y >= vy) {
 				return Quadrant.QUAD_ONE;
-			} else {
+			} else if (x <= vx && y > vy) {
 				return Quadrant.QUAD_TWO;
+			} else if (x < vx && y <= vy) {
+				return Quadrant.QUAD_THREE;
+			} else { // (x >= vx && y < vy) 
+				return Quadrant.QUAD_FOUR;
 			}
 		}
 		
@@ -176,120 +212,6 @@ public class SpaceTree <T extends Coordinate > {
 		private Boolean hasChild(Quadrant quad) {
 			return children.containsKey(quad);
 		}
-		
-		/**
-		 * The meat of the adjacency algorithm. This algorithm is pure recursive.
-		 * @param elem
-		 * @return true if the elem is adjacent to an element in this's subtree,
-		 * otherwise false.
-		 * 
-		 * There are a number of special cases. We would like to just recurse 
-		 * into the quadrant that elem would go in, but it is possible that 
-		 * elem is on the border of two quadrants, or, depending on the type of
-		 * adjacency under consideration (AdjacencyType), three. This is 
-		 * obviously a little messy, but this function is the key to this data
-		 * structure.
-		 *   
-		 * Graphically, the quadrants around a node (labeled R) looke like this:
-		 *   
- 		 *  |2|2|2|2|1|1|1|
- 		 *  |2|2|2|2|1|1|1|
- 		 *  |2|2|2|2|1|1|1|
- 		 *  |3|3|3|R|1|1|1|
- 		 *  |3|3|3|4|4|4|4|
- 		 *  |3|3|3|4|4|4|4|
- 		 *  |3|3|3|4|4|4|4|
- 		 * 
- 		 * If we're using NO_CORNERS adjacency, this gives the following edges:
- 		 * 
- 		 *  | | | |2|1| | |
- 		 *  | | | |2|1| | |
- 		 *  |2|2|2|2|1| | |
- 		 *  |3|3|3|R|1|1|1|
- 		 *  | | |3|4|4|4|4|
- 		 *  | | |3|4| | | |
- 		 *  | | |3|4| | | |
- 		 * 
- 		 *  If R is the value of the current node and E is the elemnt under
- 		 *  consideration, the edges are determined by the following 
- 		 *  conditions:
- 		 *  
- 		 *  Q1-Q2 edge: (R.x <= E.x && E.x <= R.x + 1 && R.y < E.y)
- 		 *  
- 		 *  Q2-Q3 edge: (R.x > E.x  && R.y <= E.y && E.y <= R.y + 1) 
- 		 *  
- 		 *  Q3-Q4 edge: (R.x - 1 <= E.x && E.x <= R.x && R.y > E.y)
- 		 *  
- 		 *  Q4-Q1 edge: (R.x < E.x && R.y - 1 <= E.y && E.y <= R.y)
- 		 *  
- 		 *  If we are using CORNERS adjacency, we have the following
- 		 *  special cases where the element under consideration could be
- 		 *  adjacent to a node in one of three quadrants. (Denoted with *'s)
- 		 *  
- 		 *  | | | |2|1| | |
- 		 *  | | | |2|1| | |
- 		 *  |2|2|2|*|1| | |
- 		 *  |3|3|*|R|*|1|1|
- 		 *  | | |3|*|4|4|4|
- 		 *  | | |3|4| | | |
- 		 *  | | |3|4| | | | 
- 		 *  
- 		 *  However, note that all of these are adjacent to R, so we don't
- 		 *  actually need to consider these cases separately.
-		 */
-		private Boolean adjacent(T elem) {
-			// base cases
-			if (value.equals(elem) && adjacentNodes(value, elem)) {
-				return true;
-			} else if (children.size() == 0) {
-				return false;
-			}
-			
-			int rx = value.getX(); // root's x
-			int ry = value.getY(); // root's y
-			int ex = elem.getX();  // elem's x
-			int ey = elem.getY();  // elem's y
-			
-			if (rx <= ex && ex <= rx + 1 && ry < ey) {
-				// Q1 - Q2 edge
-				return getChild(Quadrant.QUAD_ONE).adjacent(elem)
-						|| getChild(Quadrant.QUAD_TWO).adjacent(elem);
-			} else if (rx > ex  && ry <= ey && ey <= ry + 1) {
-				// Q2 - Q3 edge
-				return getChild(Quadrant.QUAD_TWO).adjacent(elem)
-						|| getChild(Quadrant.QUAD_THREE).adjacent(elem);
-			} else if (rx - 1 <= ex && ex <= rx && ry > ey) {
-				// Q3 - Q4 edge
-				return getChild(Quadrant.QUAD_THREE).adjacent(elem)
-						|| getChild(Quadrant.QUAD_FOUR).adjacent(elem);
-			} else if (rx < ex && ry - 1 <= ey && ey <= ry) {
-				// Q4 - Q1 edge
-				return getChild(Quadrant.QUAD_FOUR).adjacent(elem)
-						|| getChild(Quadrant.QUAD_ONE).adjacent(elem);
-			} else {
-				return getChild(relativePosition(elem)).adjacent(elem);
-			}
-		}
-		
-		/**
-		 * Determines if two pixels are adjacent. The paramaters for Adjacency 
-		 * are determined by the adjacency type specified at construction.
-		 * @param a the first pixel
-		 * @param b the second pixel
-		 * @return True if the two pixels are adjacent, false otherwise.
-		 */
-		private Boolean adjacentNodes(T a, T b) {
-			if (adjType == AdjacencyType.CORNERS) {
-				return Math.abs(a.getX() - b.getX()) <= 1 
-				       &&  Math.abs(a.getY() - b.getY()) <= 1; 
-			} else if (adjType == AdjacencyType.NO_CORNERS) {
-				return (a.getX() == b.getX() && Math.abs(a.getY() - b.getY()) <= 1)
-					   ||  (a.getY() == b.getY() && Math.abs(a.getX() - b.getX()) <= 1);
-			} else {
-				System.err.println("SpaceTree: adjacent: got unknown adjacency type.");
-				return false;
-			}
-		}
 	}
 	
 	/* private data members of SpaceTree: */
@@ -297,4 +219,22 @@ public class SpaceTree <T extends Coordinate > {
 	private Node root = null;
 	private int size = 0;
 	private AdjacencyType adjType = AdjacencyType.CORNERS;
+	
+	private Boolean contains(int x, int y) {
+		if (root == null) {
+			return false;
+		}
+		
+		Node current = root;
+		Quadrant quad = current.relativePosition(x,y);
+		while (current.hasChild(quad)) {
+			Node child = current.getChild(quad);
+			if (child.value.getX() == x && child.value.getY() == y) {
+				return true;
+			}
+			current = child;
+			quad = current.relativePosition(x,y);
+		}
+		return false;
+	}
 }
