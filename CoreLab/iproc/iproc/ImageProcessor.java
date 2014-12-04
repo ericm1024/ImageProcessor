@@ -16,7 +16,7 @@ import java.util.NoSuchElementException;
 
 import javax.imageio.ImageIO;
 
-public class ImageProcessor {
+public class ImageProcessor implements Iterable<Pixel> {
 	
 	/* public members */
 	public static final String OUTPUT_FILE_TYPE = "png";
