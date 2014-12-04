@@ -1,6 +1,6 @@
 package iproc.lib;
 
-public class Point {
+public class Point extends iproc.Coordinate {
 	public short x_;
 	public short y_;
 	
@@ -27,5 +27,20 @@ public class Point {
 	@Override
 	public int hashCode() {
 		return (int) x_ | (int) y_ >> 16; 
+	}
+	
+	@Override
+	public int getX() {
+		return x_;
+	}
+	
+	@Override
+	public int getY() {
+		return y_;
+	}
+	
+	@Override
+	public iproc.Coordinate makeCopy() {
+		return new Point(x_, y_);
 	}
 }
