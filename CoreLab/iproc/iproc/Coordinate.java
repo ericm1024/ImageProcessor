@@ -16,4 +16,9 @@ public abstract class Coordinate {
 	 * @return the y value of the objec.
 	 */
 	public abstract int getY();
+	
+	/**
+	 * 'Virtual' copy constructor
+	 */
+	public abstract Coordinate makeCopy();
 }
