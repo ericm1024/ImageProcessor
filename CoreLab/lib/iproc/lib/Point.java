@@ -1,6 +1,6 @@
 package iproc.lib;
 
-public class Point extends iproc.Coordinate {
+public class Point extends iproc.lib.Coordinate {
 	public short x_;
 	public short y_;
 	
@@ -40,7 +40,7 @@ public class Point extends iproc.Coordinate {
 	}
 	
 	@Override
-	public iproc.Coordinate makeCopy() {
+	public iproc.lib.Coordinate makeCopy() {
 		return new Point(x_, y_);
 	}
 }

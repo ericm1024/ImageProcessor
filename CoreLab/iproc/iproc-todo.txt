@@ -1,3 +1,12 @@
+* tests:
+	RawPixel
+	Pixel
+	
+* create classes
+
+
+
+
 * create a kernel class, make kernels matrices
 	methods:
 		Kernel(Matrix kernel, String name) 

@@ -1,4 +1,4 @@
-package iproc;
+package iproc.lib;
 
 /**
  * A coordinate is any generic object that has an x and y position.

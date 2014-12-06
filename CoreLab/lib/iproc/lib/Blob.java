@@ -1,11 +1,15 @@
-package iproc;
+package iproc.lib;
+
+import iproc.Pixel;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 
 public class Blob {
 	public Blob(Pixel root, int thresh) {
 		members = new SpaceTree<Pixel>();
+		others = new ArrayList<>();
 		Deque<Pixel> queue = new ArrayDeque<Pixel>();
 		
 		members.insert(root);
@@ -45,11 +49,27 @@ public class Blob {
 	}
 	
 	public Boolean adjacent(Pixel pix) {
-		return members.adjacent(pix);
+		if (members.adjacent(pix)) {
+			return true;
+		}
+		for (Blob b : others) {
+			if (b.members.adjacent(pix)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public Boolean contains(Pixel pix) {
-		return members.contains(pix);
+		if (members.contains(pix)) {
+			return true;
+		}
+		for (Blob b : others) {
+			if (b.members.contains(pix)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public void insert(Pixel pix) {
@@ -57,5 +77,10 @@ public class Blob {
 		return;
 	}
 	
+	public void addOther(Blob other) {
+		others.add(other);
+	}
+	
 	private SpaceTree<Pixel> members = null;
+	private ArrayList<Blob> others = null;
 }

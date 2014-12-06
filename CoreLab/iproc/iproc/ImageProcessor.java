@@ -1,5 +1,6 @@
 package iproc;
 
+import iproc.lib.Blob;
 import iproc.lib.RawPixel;
 import iproc.lib.RawPixel.ColorField;
 
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -1569,5 +1571,236 @@ public class ImageProcessor implements Iterable<Pixel> {
 			}
 		}
 		return data;
+	}
+	
+	/**
+	 * The last step of the canny algorithm.
+	 * @param lower    The lower hysteresis threshold
+	 * @param upper    The upper hysteresis threshold
+	 * @param maxpath  The maximum path length
+	 */
+	public void hysteresisThresh(int lower, int upper, int maxpath) {
+		
+		// find and store all blobs with pixels above the upper threshold.  // O(n^2)
+		// AND
+		// find and store all of the mid-range pixels that are adjacent to
+		// an 'accepted' pixel;
+		// O(n^2)
+		ArrayList<Blob> blobs = new ArrayList<>();
+		HashSet<Pixel> possibleEnds = new HashSet<>();
+		for (Pixel p : this) {
+			if (p.getGrey() < upper) {
+				if (p.getGrey() >= lower && hasNeighborAbove(p,upper)) {
+					possibleEnds.add(new Pixel(p));
+				}
+				continue;
+			}
+			boolean found = false;
+			for (Blob b : blobs) {
+				if (b.contains(p)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				blobs.add(new Blob(p, upper));
+			}
+		}
+		
+		System.out.println("iproc.ImageProcessor.hysteresisThresh: found "
+				+ blobs.size() + " blobs.");
+		
+		System.out.println("iproc.ImageProcessor.hysteresisThresh: found "
+				+ possibleEnds.size() + " pixels that could be the ends of edges.");
+		
+		// for each mid range pixel that is adjacent to a blob:
+		// O(n^2) (avg case much better... really O(num_blobs) )
+		int counter = 0;
+		while (possibleEnds.size() > 0) {
+			counter++;
+			Pixel p = possibleEnds.iterator().next();
+			possibleEnds.remove(p);
+			
+			// find all possible paths of length up to maxpath    
+			// O(2^l) (approx constant for small path lengths) 
+			HashSet<ArrayList<Pixel>> paths = getAllPaths(p,lower,upper,maxpath);
+			
+			// discard paths that do not connect two blobs and find the shortest path
+			// O(2^l * num_blobs * log(avg_blob_size)
+			ArrayList<Pixel> shortest = new ArrayList<>();
+			int shortestLength = Integer.MAX_VALUE;
+			for (ArrayList<Pixel> path : paths) {
+				// sanity check -- the first pixel in the path better be adjacent to
+				// a high pixel
+				assert(hasNeighborAbove(path.get(0),upper));
+				
+				// find out if the path under consideration connects two blobs
+				boolean doesConnect = false;
+				for (Blob b : blobs) {
+					if (b.adjacent(path.get(path.size()-1))) {
+						doesConnect = true;
+						break;
+					}
+				}
+				
+				// if the path doesn't connect to another blob, we won't consider it
+				if (doesConnect && path.size() < shortestLength) {
+					shortest = path;
+					shortestLength = path.size();
+				}
+			}
+			
+			// add the new pixels to the edge
+			for (Pixel localp : shortest) {
+				localp.setGrey(RawPixel.INT_COLOR_MAX);
+				// we don't want to consider these pixels for edges again.
+				if (possibleEnds.contains(localp)) {
+					possibleEnds.remove(localp);
+				}
+			}
+			
+			// finally, we want to combine all of the blobs that the longest edge touched
+			// this ensures that we don't try to connect two blobs later that are already 
+			// connected
+			Blob first = null;
+			ArrayList<Blob> trash = new ArrayList<>();
+			for (Pixel localp : shortest) {
+				for (Blob b : blobs) {
+					if (b.adjacent(localp)) {
+						if (first == null) {
+							first = b;
+						} else {
+							first.addOther(b);
+							trash.add(b);
+						}
+					}
+				}
+				// clean up the trash
+				for (Blob b : trash) {
+					blobs.remove(b);
+				}
+			}
+		}
+		
+		System.out.println("iproc.ImageProcessor.hysteresisThresh: main while loop ran "
+				+ counter + " times.");
+	}
+	
+	/**
+	 * Helper function for hysteresisThresh and its helpers. Determines
+	 * if p has at least one neighbor above the specified threshold.  
+	 * @param p      The pixel under consideration.
+	 * @param high   The lower limit at which to consider a neighbor high
+	 * @return true if p has a neighbor with a greyscale value >= 'high' 
+	 */
+	private boolean hasNeighborAbove(Pixel p, int high) {
+		Pixel neighbor = new Pixel(p);
+		int x = p.getX();
+		int y = p.getY();
+		
+		// loop over all neighbors
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= 1; j++) {
+				if (i == 0 && j == 0) { // we aren't our own neighbor 
+					continue;
+				}
+				
+				if (neighbor.inImage(x+i, y+j) && neighbor.moveTo(x+i, y+j)
+						.getGrey() >= high) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Helper function for hysteresisThresh. Leverages getAllPathsHelper
+	 * for the actual work.
+	 * 
+	 * @param p       The pixel to start at. unmodified.
+	 * @param lower   The lower hysteresis threshold.
+	 * @param upper   The upper hysteresis threshold.
+	 * @param maxpath The maximum path length.
+	 * @return A set containing all possible paths of length up to maxpath
+	 * contain pixels with greyscale values in the range [lower,upper)
+	 */
+	private HashSet<ArrayList<Pixel>> getAllPaths(Pixel p, int lower, int upper, int maxpath) {
+		HashSet<ArrayList<Pixel>> paths = new HashSet<>();
+		ArrayList<Pixel> first = new ArrayList<>();
+		first.add(new Pixel(p));
+		paths.add(first);
+		getAllPathsHelper(paths, first, lower, upper, maxpath - 1);
+		
+		return paths;
+	}
+	
+	/**
+	 * Helper function for getAllPaths. This function is purely recursive.
+	 * Finds all possible paths starting with 'pix'. Each sucessive pixel
+	 * in a path will be adjacent to the previous pixel. The paths are
+	 * stored in the 'paths' variable. The path shall only contain pixels
+	 * whose greyscale values are in the range [lower,upper)
+	 * 
+	 * @param paths        The set of all current paths.
+	 * @param currentPath  The path so far. unmodified.
+	 * @param lower        The lower hysteresis threshold.
+	 * @param upper        The upper hysteresis threshold.
+	 * @param maxpath      The maximum path length.
+	 */
+	private void getAllPathsHelper(HashSet<ArrayList<Pixel>> paths, 
+			ArrayList<Pixel> currentPath,
+			int lower, int upper, int maxpath) {
+		
+		if (maxpath <= 0) {
+			return;
+		}
+		
+		// get the neighbors of the last pixel in the path
+		HashSet<Pixel> neighbors = getMidNeighbors(currentPath
+				.get(currentPath.size() -1), lower, upper);
+		
+		for (Pixel p : neighbors) {
+			if (!currentPath.contains(p)) {
+				ArrayList<Pixel> newPath = new ArrayList<>();
+				for (Pixel localp : currentPath) {
+					newPath.add(new Pixel(localp)); // deep copy
+				}
+				paths.add(newPath);
+				getAllPathsHelper(paths, newPath, lower, upper, maxpath-1);
+			}
+		}
+	}
+	
+	/**
+	 * Looks at the 8 neighboring pixels of center and returns a
+	 * set containing all of them betwen the two thresholds. Constant time.
+	 *  
+	 * @param center  the pixel to get neighbors of. unmodified.
+	 * @param lower   the lower hysteresis threshold 
+	 * @param upper   the upper hysteresis threshold 
+	 * @return A hash set containing all pixels neighboring center
+	 *         that have a greyscale value greater than or equal to lower and 
+	 *         strictly less than upper.
+	 */
+	private HashSet<Pixel> getMidNeighbors(Pixel center, int lower, int upper) {
+		
+		HashSet<Pixel> neighbors = new HashSet<>();
+		Pixel pix = new Pixel(center);
+		
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= -1; j++) {
+				int x = i + center.getX();
+				int y = i + center.getY();
+				
+				if ((i != 0 || j != 0)  // a pixel can't be its own neighbor
+					&& pix.inImage(x, y) 
+					&& pix.moveTo(x,y).getGrey() >= lower 
+					&& pix.getGrey() < upper) { 
+					neighbors.add(new Pixel(pix));
+				}
+			}
+		}
+		return neighbors;
 	}
 }

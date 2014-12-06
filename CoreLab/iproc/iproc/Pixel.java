@@ -1,5 +1,6 @@
 package iproc;
 
+import iproc.lib.Coordinate;
 import iproc.lib.Point;
 import iproc.lib.RawPixel;
 
@@ -150,7 +151,7 @@ public class Pixel extends Coordinate {
 		return (pixel_.getColorInt(RawPixel.ColorField.RED)
 				+ pixel_.getColorInt(RawPixel.ColorField.GREEN)
 				+ pixel_.getColorInt(RawPixel.ColorField.BLUE)
-				/3);
+				)/3;
 	}
 	
 	public float getRedFloat() {
@@ -169,7 +170,7 @@ public class Pixel extends Coordinate {
 		return (pixel_.getColorFloat(RawPixel.ColorField.RED)
 				+ pixel_.getColorFloat(RawPixel.ColorField.GREEN)
 				+ pixel_.getColorFloat(RawPixel.ColorField.BLUE)
-				/3f);
+				)/3f;
 	}
 	
 	public void greyscale() {

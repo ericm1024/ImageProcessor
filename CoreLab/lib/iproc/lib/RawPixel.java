@@ -1,8 +1,13 @@
 package iproc.lib;
 
+import iproc.Pixel;
+
 import java.awt.Color;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class RawPixel {
 	
@@ -67,6 +72,46 @@ public class RawPixel {
 	public RawPixel(RawPixel other) {
 		this.mode_ = other.mode_;
 		this.setColorRgb(other.getColorRgb());
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (other == null) { 
+			return false; 
+		} else if (other == this) { 
+			return true; 
+		} else if (other.getClass() != getClass()) {
+			return false;
+		}
+		RawPixel rhs = (RawPixel) other;
+		Mode oldMode = mode_;
+		assertMode(rhs.mode_);
+		boolean result =  new EqualsBuilder()
+	                 .append(red_, rhs.red_)
+	                 .append(green_, rhs.green_)
+	                 .append(blue_, rhs.blue_)
+	                 .append(alpha_, rhs.alpha_)
+	                 .isEquals();
+		assertMode(oldMode);
+		return result;
+	}
+	
+	
+	/*
+	 * wolfram alpha search "random prime number less than 2^31" twice
+	 */
+	@Override
+	public int hashCode() {
+		Mode oldMode = mode_;
+		assertMode(Mode.INT);
+		int hc = new HashCodeBuilder(2026332229, 366425629).
+			       append(red_).				
+			       append(green_).
+			       append(blue_).
+			       append(alpha_).
+			       toHashCode();
+		assertMode(oldMode);
+		return hc;
 	}
 	
 	/**

@@ -2,10 +2,10 @@ package labs;
 
 import iproc.ImageProcessor;
 import iproc.Pixel;
-import iproc.SpaceTree;
 import iproc.lib.ConvolveLib;
 import iproc.lib.Point;
 import iproc.lib.RawPixel;
+import iproc.lib.SpaceTree;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -32,7 +32,7 @@ public class LabNine {
 	private static File FUZZY_EDGE = new File(WORK_DIR+"fuzzy_edge.png");
 	
 	public static void main(String args[]) {
-		canny(FUZZY_EDGE, "fuzzy-edge");
+		canny(GUMBY, "gumby");
 	}
 	
 	private static void laplace(File starter, final String name) {
@@ -79,29 +79,32 @@ public class LabNine {
 		
 		/* step 1: smooth with a Gaussian kernel */
 		proc.convolve(ConvolveLib.KERNEL_LAB9_GAUSS);
+		proc.writeWorkingImage(new File(OUT_DIR+name+"-step-1-gauss-filter.png"));
 		
 		/* step 2: compute the gradient */
 		float[][] gradientX = ConvolveLib.GRAD_SCHARR_X;
 		float[][] gradientY = ConvolveLib.GRAD_SCHARR_Y;
 		proc.gradient(gradientX, gradientY);
+		proc.writeWorkingImage(new File(OUT_DIR+name+"-step-2-gradient.png"));
 		
 		/* step 3: threshold the magnitude of the gradient */
 		/* threshold value (should be between 0 and 1) */
-		float threshold = 0.07f;
+		float threshold = 0.45f;
 		proc.threshold(threshold);
+		proc.writeWorkingImage(new File(OUT_DIR+name+"-step-3-thresh.png"));
 		
 		/* step 4: supress non-maximum pixels */
 		/* trim the mess off of the edges because convolution sucks */
+		/*
 		proc.trim(5);
-
+		
 		float[][] greyscale = proc.getGreyscale();
 		float[][] supressed = proc.getGreyscale();
 		
 		for (int x = 0; x < greyscale.length; x++) {
 			for (int y = 0; y < greyscale[0].length; y++) {
 				if (greyscale[x][y] != 0) {
-					float theta = proc.gradientAngle(greyscale, x, y, gradientX, gradientY);
-					
+					float theta = proc.gradientAngle(greyscale, x, y, gradientX, gradientY);	
 					float n1 = getNeighbor(greyscale, x, y, theta, 1);
 					float n2 = getNeighbor(greyscale, x, y, theta, -1);
 					
@@ -114,106 +117,16 @@ public class LabNine {
 			}
 		}
 		proc.setFromGreyscale(supressed);
+		proc.writeWorkingImage(new File(OUT_DIR+name+"-step-4-nm-thresh.png"));
+		*/
+		
 		
 		/* step 5: hysteresis */
-		int lower = 10;
-		int upper = 115;
-		int maxpath = 3;
-				
-		Iterator<Pixel> iter = proc.iterator();
-		while(iter.hasNext()) {
-			Pixel pix = iter.next();
-			if (pix.getGrey() < lower) { // if its below the lower threshold, we trash it
-				pix.setGrey(RawPixel.INT_COLOR_MIN);
-			} else if (pix.getGrey() >= upper) { // if its above the upper threshold, we keep it
-				pix.setGrey(RawPixel.INT_COLOR_MAX);
-			}
-		}
-		
-		// reset the iterator
-		iter = proc.iterator();
-		List<Blob> blobCache = new ArrayList<Blob>();
-		while(iter.hasNext()) {
-			Pixel pix = iter.next();
-			if (pix.getGrey() <= upper && pix.getGrey() > lower) {
-				connectPossibleEdges(pix, maxpath, lower, blobCache);
-			}
-		}
-		
+		int lower = 50;
+		int upper = 145;
+		int maxpath = 4;
+		proc.hysteresisThresh(lower, upper, maxpath);
 		proc.writeWorkingImage(new File(OUT_DIR+name+"-canny-edge.png"));
-	}
-	
-	private static int connectPossibleEdges(Pixel start, int maxpath, 
-			int lower, List<Blob> blobCache) {
-		
-		Boolean foundBlob = false;
-		for (Blob b : blobCache) {
-			if (b.adjacent(start)) {
-				b.insert(start);
-				foundBlob = true;
-				break;
-			}
-		}
-		
-		if (!foundBlob) {
-			blobCache.add(new Blob(start, lower));
-		}
-		
-		
-		return maxpath;
-	}
-	
-	private static class Blob {
-		public Blob(Pixel root, int thresh) {
-			members = new SpaceTree<Pixel>();
-			Deque<Pixel> queue = new ArrayDeque<Pixel>();
-			
-			members.insert(root);
-			queue.addLast(root);
-			
-			while (!queue.isEmpty()) {
-				Pixel pix = queue.pop();
-				if (members.adjacent(pix)) {
-					members.insert(pix);
-					queue = getNewHighNeighbors(queue, pix, thresh);
-				}
-			}
-		}
-		
-		private Deque<Pixel> getNewHighNeighbors(Deque<Pixel> queue, 
-				Pixel center, int thresh) {
-			
-			Pixel pix = new Pixel(center);
-			int window = 3;
-			
-			for (int i = -(window/2); i < window/2; i++) {
-				for (int j = -(window/2); j < window/2; j++) {
-					int x = i + center.getX();
-					int y = i + center.getY();
-					
-					if (!pix.inImage(x,  y) || members.contains(pix)) { 
-						continue;
-					}
-
-					if (pix.moveTo(x,y).getGrey() >= thresh) {
-						queue.addLast(new Pixel(pix));
-					}
-				}
-			}
-			
-			return queue;
-		}
-		
-		public Boolean adjacent(Pixel pix) {
-			return members.adjacent(pix);
-		}
-		
-		public void insert(Pixel pix) {
-			members.insert(pix);
-			return;
-		}
-		
-		private SpaceTree<Pixel> members = null;
 	}
 	
 	private static float magnitude(float x, float y) {
@@ -258,8 +171,5 @@ public class LabNine {
 		} catch (ArrayIndexOutOfBoundsException e) {
 			return 0f;
 		}
-	}
-	
-
-	
+	}	
 }

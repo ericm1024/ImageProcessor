@@ -2,17 +2,20 @@ package labs;
 
 import iproc.ImageProcessor;
 import iproc.Pixel;
+import iproc.lib.Point;
 import iproc.lib.RawPixel;
 
 import java.io.File;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashSet;
 
 public class LabTen {
 	public static String WORK_DIR = "/Users/eric/Desktop/mudd_fall2014/lab/10/";
 	public static String OUT_DIR = WORK_DIR+"out/";
 	
-	private static File GUMBY = new File(WORK_DIR+"gumby.png");
+	private static File GUMBY = new File(WORK_DIR+"gumby2.png");
 	
 	public static void main(String args[]) {
 		traceEdge(GUMBY, "gumby");
@@ -30,15 +33,8 @@ public class LabTen {
 				break;
 			}
 		}
-		
-		// traverse the rest
-		HashSet<Pixel> seen = new HashSet<>();
-		ArrayList<Pixel> edge = new ArrayList<>();
-		while (edgeMember != null) {
-			seen.add(edgeMember);
-			edge.add(edgeMember);
-			edgeMember = newNeighborOf(edgeMember, seen);
-		}
+
+		ArrayList<Pixel> edge = trace(edgeMember);
 		
 		// set the edge to red
 		for (Pixel p : edge) {
@@ -48,33 +44,44 @@ public class LabTen {
 		proc.writeWorkingImage(new File(OUT_DIR+name+"-edge.png"));
 	}
 	
-	/**
-	 * @param pix
-	 * @return
-	 */
-	private static Pixel newNeighborOf(Pixel pix, HashSet<Pixel> seen) {
+	private static ArrayList<Pixel> trace(Pixel root) {
+		ArrayList<Pixel> edge = new ArrayList<>();
+		HashSet<Point> seen = new HashSet<>();
+		Deque<Pixel> queue = new ArrayDeque<Pixel>();
 		
-		Pixel neighbor = null;
-		int srcX = pix.getX();
-		int srcY = pix.getY();
-		int window = 3;
+		edge.add(root);
+		seen.add(root.where());
+		queue.addLast(root);
 		
-	search:
-		for (int x = -(window/2); x < window/2; x++) {
-			for (int y = -(window/2); y < window/2; y++) {
-				if (!pix.inImage(srcX + x,  srcY + y)) { 
+		while (!queue.isEmpty()) {
+			Pixel pix = queue.pop();
+			assert(!edge.contains(pix));
+			edge.add(new Pixel(pix));
+			queue = getNewNeighbors(queue, seen, pix);
+		}
+		return edge;
+	}
+	
+	private static Deque<Pixel> getNewNeighbors(Deque<Pixel> queue, 
+			HashSet<Point> seen, Pixel center) {
+		
+		Pixel pix = new Pixel(center);
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= 1; j++) {
+				int x = i + center.getX();
+				int y = i + center.getY();
+				
+				if (!pix.inImage(x, y) || (i==0 && j==0)) { 
 					continue;
 				}
-				pix.moveTo(srcX + x, srcY + y);
-				if (!seen.contains(pix) && pix.getGrey() != 0) {
-					neighbor = new Pixel(pix);
-					break search;
+				
+				pix.moveTo(x, y);
+				if (!seen.contains(pix.where()) && pix.getGrey() != 0) {
+					queue.addLast(new Pixel(pix));
+					seen.add(pix.where());
 				}
 			}
-		}
-	
-		// move the pixel back where we found it
-		pix.moveTo(srcX, srcY);
-		return neighbor;
+		}	
+		return queue;
 	}
 }

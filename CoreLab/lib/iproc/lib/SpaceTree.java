@@ -1,4 +1,4 @@
-package iproc;
+package iproc.lib;
 
 import java.util.EnumMap;
 
@@ -40,6 +40,7 @@ public class SpaceTree <T extends Coordinate > {
 	 * @param elem    The element to insert.
 	 */
 	public void insert(T elem) {
+		size++;
 		if (root == null) {
 			root = new Node(elem);
 			return;
@@ -54,7 +55,6 @@ public class SpaceTree <T extends Coordinate > {
 			;
 		}
 		current.setChild(quad, elem);
-		size++;
 	}
 	
 	/**
@@ -72,6 +72,10 @@ public class SpaceTree <T extends Coordinate > {
 	 * @return True if the element is adjacent to some element in the tree.
 	 */
 	public Boolean adjacent(T elem) {
+		if (contains(elem)) {
+			return true;
+		}
+		
 		int x = elem.getX();
 		int y = elem.getY();
 		
@@ -168,9 +172,7 @@ public class SpaceTree <T extends Coordinate > {
 			int vx = value.getX();
 			int vy = value.getY();
 			
-			if (vx == x || vy == y) {
-				System.out.println("iproc.SpaceTree.Node.relativePosition(): got invalid position.");
-			}
+			assert (vx != x || vy != y);
 			
 			if (x > vx && y >= vy) {
 				return Quadrant.QUAD_ONE;
@@ -226,6 +228,11 @@ public class SpaceTree <T extends Coordinate > {
 		}
 		
 		Node current = root;
+		
+		if (root.value.getX() == x && root.value.getY() == y) {
+			return true;
+		}
+		
 		Quadrant quad = current.relativePosition(x,y);
 		while (current.hasChild(quad)) {
 			Node child = current.getChild(quad);
