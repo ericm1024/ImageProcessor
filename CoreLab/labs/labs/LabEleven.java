@@ -21,6 +21,7 @@ public class LabEleven {
 		lab.proc = new ImageProcessor(PANDA);
 		lab.problemOne();
 		lab.problemTwo();
+		System.exit(0);
 	}
 	
 	// write original panda & spectrum to images
@@ -39,7 +40,6 @@ public class LabEleven {
 		
 		proc.writeWorkingImage(new File(OUT_DIR+name+"-original.png"));
 		ImageProcessor.writeImage(spectrum, new File(OUT_DIR+name+"-spectrum.png"));
-		System.out.println("done.");
 	}
 	
 	// idealLP, idealHP, butterworthLP, butterworthHP
@@ -50,10 +50,20 @@ public class LabEleven {
 		double[][] butterHp = fftShift(pandaFft());
 		
 		// do filtering
-		idealLpFilter(idealLp, 5);
-		idealHpFilter(idealHp, 5);
-		butterworthLpFilter(butterLp, 5, 5);
-		butterworthHpFilter(butterHp, 5, 5);
+		idealLpFilter(idealLp, 30);
+		idealHpFilter(idealHp, 10);
+		butterworthLpFilter(butterLp, 20, 5);
+		butterworthHpFilter(butterHp, 10, 5);
+		
+		// write the spectrums to files
+		ImageProcessor.writeImage(spectrumFromComplex(idealLp,0.5), new File(
+				OUT_DIR+name+"-ideal-low-pass-spectrum.png"));
+		ImageProcessor.writeImage(spectrumFromComplex(idealHp,0.5), new File(
+				OUT_DIR+name+"-ideal-high-pass-spectrum.png"));
+		ImageProcessor.writeImage(spectrumFromComplex(butterLp,0.5), new File(
+				OUT_DIR+name+"-butterworth-low-pass-spectrum.png"));
+		ImageProcessor.writeImage(spectrumFromComplex(butterHp,0.5), new File(
+				OUT_DIR+name+"-butterworth-high-pass-spectrum.png"));
 		
 		// reverse the transform
 		reverseFft(fftShift(idealLp));
@@ -63,14 +73,13 @@ public class LabEleven {
 		
 		// write the images to files
 		ImageProcessor.writeImage(imgFromComplex(idealLp), new File(
-				OUT_DIR+name+"ideal-low-pass.png"));
+				OUT_DIR+name+"-ideal-low-pass.png"));
 		ImageProcessor.writeImage(imgFromComplex(idealHp), new File(
-				OUT_DIR+name+"ideal-high-pass.png"));
+				OUT_DIR+name+"-ideal-high-pass.png"));
 		ImageProcessor.writeImage(imgFromComplex(butterLp), new File(
-				OUT_DIR+name+"butterworth-low-pass.png"));
+				OUT_DIR+name+"-butterworth-low-pass.png"));
 		ImageProcessor.writeImage(imgFromComplex(butterHp), new File(
-				OUT_DIR+name+"butterworth-high-pass.png"));
-		System.out.println("done.");
+				OUT_DIR+name+"-butterworth-high-pass.png"));
 	}
 
 	private double[][] pandaFft() { /* http://imgur.com/mih8b */
@@ -192,9 +201,22 @@ public class LabEleven {
 		Pixel worker = new Pixel(img);
 		for (int y = 0; y < data.length; y++) {
 			for (int x = 0; x < data[0].length; x += 2) {
-				worker.moveTo(y, x/2);
+				worker.moveTo(x/2, y);
 				double val = Math.hypot(data[y][x], data[y][x+1]);
 				worker.setGrey((int)val);
+			}
+		}
+		return img;
+	}
+	
+	private BufferedImage spectrumFromComplex(double[][] data, double power) {
+		BufferedImage img = proc.blankCopy();
+		Pixel worker = new Pixel(img);
+		for (int y = 0; y < data.length; y++) {
+			for (int x = 0; x < data[0].length; x += 2) {
+				worker.moveTo(x/2, y);
+				double val = Math.hypot(data[y][x], data[y][x+1]);
+				worker.setGrey((int)Math.pow(val,power));
 			}
 		}
 		return img;
