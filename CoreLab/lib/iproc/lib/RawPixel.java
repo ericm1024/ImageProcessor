@@ -1,7 +1,5 @@
 package iproc.lib;
 
-import iproc.Pixel;
-
 import java.awt.Color;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
